@@ -12,6 +12,7 @@ interface EntryLayerProps {
   onEntryClick: (entryId: string) => void;
   onEntryHover: (entry: Entry | null) => void;
   zoom?: number;
+  pulseTime?: number;
 }
 
 /**
@@ -52,6 +53,7 @@ export function createEntryLayers(props: EntryLayerProps): ScatterplotLayer[] {
     onEntryClick,
     onEntryHover,
     zoom = 2,
+    pulseTime = 0,
   } = props;
 
   const dotOpacityMultiplier = getDotOpacityMultiplier(zoom);
@@ -141,5 +143,37 @@ export function createEntryLayers(props: EntryLayerProps): ScatterplotLayer[] {
     },
   });
 
-  return [glowLayer, mainLayer];
+  // Pulse ring around the selected entry
+  const selectedEntry = selectedEntryId
+    ? visibleEntries.filter((e) => e.id === selectedEntryId)
+    : [];
+
+  const pulsePhase = (Math.sin(pulseTime * 0.004) + 1) / 2; // 0..1 oscillation
+  const pulseLayer = new ScatterplotLayer<Entry>({
+    id: 'entry-pulse',
+    data: selectedEntry,
+    getPosition: (d) => [d.lng, d.lat],
+    getRadius: (d) => {
+      const base = TIER_RADIUS[d.tier] * 1.5;
+      // Expand from 1.8x to 3x the selected radius
+      return base * (1.8 + pulsePhase * 1.2);
+    },
+    getFillColor: [0, 0, 0, 0],
+    stroked: true,
+    getLineColor: (d) => {
+      const rgb = hexToRgb(SUBJECT_COLORS[d.subject]);
+      const alpha = Math.round((1 - pulsePhase) * 0.7 * dotOpacityMultiplier * 255);
+      return [...rgb, alpha] as [number, number, number, number];
+    },
+    getLineWidth: 2,
+    lineWidthMinPixels: 1.5,
+    radiusUnits: 'pixels' as const,
+    pickable: false,
+    updateTriggers: {
+      getRadius: [pulseTime, selectedEntryId],
+      getLineColor: [pulseTime, selectedEntryId, zoom],
+    },
+  });
+
+  return [pulseLayer, glowLayer, mainLayer];
 }

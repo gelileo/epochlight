@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEpochlightData } from './hooks/useEpochlightData';
 import { useAppState } from './hooks/useAppState';
 import { useUrlState, parseHash } from './hooks/useUrlState';
@@ -28,6 +28,22 @@ export default function App() {
   const appState = useAppState(initialUrlState);
   const [hoveredEntry, setHoveredEntry] = useState<Entry | null>(null);
   const [zoom, setZoom] = useState(2);
+  const [pulseTime, setPulseTime] = useState(0);
+  const rafRef = useRef<number>(0);
+
+  // Animate pulse when an entry is selected
+  useEffect(() => {
+    if (!appState.state.selectedEntryId) {
+      cancelAnimationFrame(rafRef.current);
+      return;
+    }
+    const animate = () => {
+      setPulseTime(performance.now());
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [appState.state.selectedEntryId]);
 
   const handleViewStateChange = useCallback((viewState: MapViewState) => {
     setZoom(viewState.zoom);
@@ -138,6 +154,7 @@ export default function App() {
     onEntryClick: handleEntryClick,
     onEntryHover: handleEntryHover,
     zoom,
+    pulseTime,
   });
 
   const entryCardLayers = createEntryCardLayers({
