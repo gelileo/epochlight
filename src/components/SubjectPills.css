@@ -1,0 +1,109 @@
+.subject-pills {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  background: var(--chrome-bg, rgba(26, 26, 46, 0.9));
+  border-radius: 12px;
+  color: var(--chrome-text, #e0e0e0);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  z-index: 1000;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  min-width: 160px;
+  transition: background 800ms ease-in-out, color 800ms ease-in-out;
+}
+
+.subject-pills__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.subject-pills__header-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.subject-pills__body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 200ms ease-in-out;
+}
+
+.subject-pills:hover .subject-pills__body,
+.subject-pills--expanded .subject-pills__body {
+  max-height: 400px;
+}
+
+.subject-pills__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 6px 6px;
+}
+
+.subject-pills__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 150ms, opacity 150ms;
+}
+
+.subject-pills__item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.subject-pills__item--disabled {
+  opacity: 0.35;
+}
+
+.subject-pills__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.subject-pills__label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.subject-pills__count {
+  font-size: 11px;
+  color: var(--chrome-muted, #999);
+  margin-left: auto;
+  min-width: 20px;
+  text-align: right;
+}
+
+.subject-pills__shortcuts {
+  display: flex;
+  gap: 4px;
+  padding: 4px 14px 8px;
+  border-top: 1px solid var(--chrome-border, rgba(255, 255, 255, 0.08));
+  margin-top: 2px;
+}
+
+.subject-pills__shortcut-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  color: var(--chrome-muted, #bbb);
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+
+.subject-pills__shortcut-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--chrome-text, #fff);
+}
