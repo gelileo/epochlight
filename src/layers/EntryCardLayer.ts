@@ -1,7 +1,6 @@
 import { TextLayer } from '@deck.gl/layers';
 import type { Layer } from '@deck.gl/core';
 import type { Entry, Era, Subject } from '../types';
-import { SUBJECT_COLORS } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
 
 interface EntryCardLayerProps {
@@ -25,15 +24,6 @@ const MEDIA_HINT_ICONS: Record<string, string> = {
 };
 
 const DEFAULT_ICON = '\u{1F4A1}';
-
-function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace('#', '');
-  return [
-    parseInt(h.substring(0, 2), 16),
-    parseInt(h.substring(2, 4), 16),
-    parseInt(h.substring(4, 6), 16),
-  ];
-}
 
 function isEntryVisible(entry: Entry, enabledSubjects: Set<Subject>): boolean {
   if (enabledSubjects.has(entry.subject)) return true;
