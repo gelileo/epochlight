@@ -94,13 +94,13 @@ export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
         ? 1.0
         : getEntryOpacity(d.year, currentYear, windowWidth);
       const alpha = Math.round(entryOpacity * cardOpacity * 255);
-      return [255, 255, 255, alpha] as [number, number, number, number];
+      // Dark text for readability on the light map
+      return [25, 20, 15, alpha] as [number, number, number, number];
     },
     getPixelOffset: [0, -18],
     fontFamily: 'system-ui, -apple-system, sans-serif',
     fontWeight: 'bold',
-    outlineWidth: 3,
-    outlineColor: [15, 15, 25, 200],
+    outlineWidth: 0,
     sizeUnits: 'pixels' as const,
     sizeScale: 1,
     billboard: true,
@@ -119,7 +119,7 @@ export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
     },
   });
 
-  // Background halo layer using subject color
+  // Background halo layer — white pill behind dark text for contrast on any map theme
   const haloLayer = new TextLayer<Entry>({
     id: 'entry-card-halo',
     data: visibleEntries,
@@ -127,19 +127,18 @@ export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
     getText: (d) => `${getMediaIcon(d.media_hint)} ${d.title}`,
     getSize: 13,
     getColor: (d) => {
-      const rgb = hexToRgb(SUBJECT_COLORS[d.subject]);
       const isSelected = d.id === selectedEntryId;
       const entryOpacity = isSelected
         ? 1.0
         : getEntryOpacity(d.year, currentYear, windowWidth);
-      const alpha = Math.round(entryOpacity * cardOpacity * 0.6 * 255);
-      return [...rgb, alpha] as [number, number, number, number];
+      const alpha = Math.round(entryOpacity * cardOpacity * 0.85 * 255);
+      return [255, 255, 250, alpha] as [number, number, number, number];
     },
     getPixelOffset: [0, -18],
     fontFamily: 'system-ui, -apple-system, sans-serif',
     fontWeight: 'bold',
-    outlineWidth: 6,
-    outlineColor: [10, 10, 20, 180],
+    outlineWidth: 8,
+    outlineColor: [255, 255, 250, 220],
     sizeUnits: 'pixels' as const,
     sizeScale: 1,
     billboard: true,
