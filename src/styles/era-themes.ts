@@ -46,7 +46,7 @@ export const ERA_THEMES: Record<string, EraTheme> = {
     chromeAccent: '#d4a857',
     toastColor: '#d4c4a0',
     handleColor: '#d4c4a0',
-    histogramColor: 'rgba(180, 140, 70, 0.35)',
+    histogramColor: 'rgba(220, 180, 80, 0.7)',
   },
   'papyrus': {
     mapFilter: 'sepia(0.45) brightness(0.80) saturate(0.75) contrast(1.05)',
@@ -59,7 +59,7 @@ export const ERA_THEMES: Record<string, EraTheme> = {
     chromeAccent: '#d4a857',
     toastColor: '#d4c4a0',
     handleColor: '#d4c4a0',
-    histogramColor: 'rgba(180, 140, 70, 0.35)',
+    histogramColor: 'rgba(220, 180, 80, 0.7)',
   },
   'marble': {
     mapFilter: 'sepia(0.30) brightness(0.85) saturate(0.80) contrast(1.05)',
@@ -72,7 +72,7 @@ export const ERA_THEMES: Record<string, EraTheme> = {
     chromeAccent: '#c8a855',
     toastColor: '#d0c5a8',
     handleColor: '#d0c5a8',
-    histogramColor: 'rgba(170, 140, 80, 0.32)',
+    histogramColor: 'rgba(210, 175, 90, 0.65)',
   },
   'parchment': {
     mapFilter: 'sepia(0.25) brightness(0.88) saturate(0.82) contrast(1.02)',
@@ -85,7 +85,7 @@ export const ERA_THEMES: Record<string, EraTheme> = {
     chromeAccent: '#c0a050',
     toastColor: '#ccc0a5',
     handleColor: '#ccc0a5',
-    histogramColor: 'rgba(160, 130, 75, 0.30)',
+    histogramColor: 'rgba(200, 165, 75, 0.65)',
   },
 
   // ── Transitional: warming down, cooling up ──────────────────────
@@ -100,7 +100,7 @@ export const ERA_THEMES: Record<string, EraTheme> = {
     chromeAccent: '#a8a070',
     toastColor: '#c8c0b0',
     handleColor: '#c8c0b0',
-    histogramColor: 'rgba(140, 130, 100, 0.28)',
+    histogramColor: 'rgba(180, 165, 110, 0.6)',
   },
 
   // ── Modern: cool, bright, aqua-tinted ───────────────────────────
@@ -115,7 +115,7 @@ export const ERA_THEMES: Record<string, EraTheme> = {
     chromeAccent: '#5ba8d0',
     toastColor: '#b0c4d8',
     handleColor: '#b0c4d8',
-    histogramColor: 'rgba(70, 140, 200, 0.28)',
+    histogramColor: 'rgba(80, 160, 230, 0.6)',
   },
   'clean': {
     mapFilter: 'brightness(1.08) saturate(0.92) hue-rotate(15deg)',
@@ -128,6 +128,6 @@ export const ERA_THEMES: Record<string, EraTheme> = {
     chromeAccent: '#4db8e8',
     toastColor: '#a8c8e0',
     handleColor: '#a8c8e0',
-    histogramColor: 'rgba(60, 150, 220, 0.30)',
+    histogramColor: 'rgba(70, 170, 250, 0.65)',
   },
 };

@@ -14,20 +14,20 @@ interface ScrubberBarProps {
   entries: Entry[];
 }
 
-const BAR_HEIGHT = 60;
-const HANDLE_RADIUS = 8;
-const HISTOGRAM_HEIGHT = 20;
+const BAR_HEIGHT = 64;
+const HANDLE_RADIUS = 9;
+const HISTOGRAM_HEIGHT = 24;
 const HISTOGRAM_BUCKETS_PER_ERA = 20;
 
-/** Subtle tint colors for each era style in the scrubber segments */
+/** Tint colors for each era segment — bolder for clarity */
 const ERA_SEGMENT_TINTS: Record<string, string> = {
-  'aged-stone': 'rgba(139, 110, 60, 0.30)',
-  'papyrus': 'rgba(160, 125, 65, 0.25)',
-  'marble': 'rgba(150, 135, 95, 0.20)',
-  'parchment': 'rgba(140, 115, 65, 0.22)',
-  'renaissance': 'rgba(120, 105, 80, 0.18)',
-  'industrial': 'rgba(70, 95, 130, 0.18)',
-  'clean': 'rgba(55, 100, 150, 0.18)',
+  'aged-stone': 'rgba(160, 120, 50, 0.45)',
+  'papyrus': 'rgba(175, 135, 55, 0.40)',
+  'marble': 'rgba(160, 145, 100, 0.35)',
+  'parchment': 'rgba(155, 125, 60, 0.35)',
+  'renaissance': 'rgba(130, 115, 85, 0.30)',
+  'industrial': 'rgba(60, 100, 150, 0.30)',
+  'clean': 'rgba(45, 110, 170, 0.30)',
 };
 
 function formatYear(year: number): string {
@@ -224,7 +224,8 @@ export default function ScrubberBar({
         right: 0,
         height: BAR_HEIGHT,
         backgroundColor: 'var(--chrome-bg, rgba(26, 26, 46, 0.9))',
-        transition: 'background-color 800ms ease-in-out',
+        borderTop: '1px solid var(--chrome-border, rgba(255,255,255,0.15))',
+        transition: 'background-color 800ms ease-in-out, border-color 800ms ease-in-out',
         zIndex: 100,
         cursor: isDragging ? 'grabbing' : 'pointer',
         userSelect: 'none',
@@ -258,23 +259,26 @@ export default function ScrubberBar({
               top: 0,
               width: 1,
               height: BAR_HEIGHT,
-              backgroundColor: 'rgba(255,255,255,0.2)',
+              backgroundColor: 'var(--chrome-text, rgba(255,255,255,0.35))',
+              opacity: 0.35,
             }}
           />
           {/* Era label */}
           <div
             style={{
               position: 'absolute',
-              left: seg.startPx + 4,
-              top: 2,
-              fontSize: 9,
-              color: 'rgba(255,255,255,0.5)',
-              letterSpacing: '0.05em',
+              left: seg.startPx + 6,
+              top: 4,
+              fontSize: 10,
+              fontWeight: 600,
+              color: 'var(--chrome-text, rgba(255,255,255,0.7))',
+              opacity: 0.75,
+              letterSpacing: '0.06em',
               textTransform: 'uppercase',
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
-              maxWidth: seg.endPx - seg.startPx - 8,
+              maxWidth: seg.endPx - seg.startPx - 12,
             }}
           >
             {seg.era.label}
@@ -288,7 +292,8 @@ export default function ScrubberBar({
                 top: 0,
                 width: 1,
                 height: BAR_HEIGHT,
-                backgroundColor: 'rgba(255,255,255,0.2)',
+                backgroundColor: 'var(--chrome-text, rgba(255,255,255,0.35))',
+                opacity: 0.35,
               }}
             />
           )}
@@ -305,8 +310,8 @@ export default function ScrubberBar({
             width: Math.max(1, bar.width - 1),
             bottom: 4,
             height: bar.height,
-            backgroundColor: 'var(--histogram-color, rgba(74, 144, 217, 0.3))',
-            borderRadius: 1,
+            backgroundColor: 'var(--histogram-color, rgba(80, 160, 230, 0.65))',
+            borderRadius: 2,
             pointerEvents: 'none',
           }}
         />
@@ -321,10 +326,11 @@ export default function ScrubberBar({
           transform: 'translateX(-50%)',
           backgroundColor: 'var(--chrome-bg, rgba(26, 26, 46, 0.95))',
           color: 'var(--chrome-text, #e0d8c8)',
-          fontSize: 11,
-          fontWeight: 500,
-          padding: '2px 8px',
-          borderRadius: 4,
+          fontSize: 13,
+          fontWeight: 700,
+          padding: '3px 10px',
+          borderRadius: 5,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
           whiteSpace: 'nowrap',
           pointerEvents: 'none',
           border: '1px solid var(--chrome-border, rgba(255,255,255,0.15))',
@@ -341,9 +347,10 @@ export default function ScrubberBar({
           top: 0,
           width: 2,
           height: BAR_HEIGHT,
-          backgroundColor: 'var(--handle-color, rgba(224, 216, 200, 0.8))',
+          backgroundColor: 'var(--handle-color, rgba(224, 216, 200, 0.9))',
           transform: 'translateX(-1px)',
           pointerEvents: 'none',
+          boxShadow: '0 0 6px rgba(0,0,0,0.3)',
         }}
       />
 
@@ -360,7 +367,7 @@ export default function ScrubberBar({
           border: '2px solid var(--chrome-bg, rgba(26, 26, 46, 0.9))',
           transform: `translate(-${HANDLE_RADIUS}px, -${HANDLE_RADIUS}px)`,
           pointerEvents: 'none',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+          boxShadow: '0 1px 6px rgba(0,0,0,0.5), 0 0 12px rgba(255,255,255,0.15)',
         }}
       />
     </div>
