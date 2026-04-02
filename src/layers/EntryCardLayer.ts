@@ -104,7 +104,7 @@ export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
       onEntryHover(info.object ?? null);
     },
     updateTriggers: {
-      getText: [],
+      getText: [entries],
       getColor: [currentYear, selectedEntryId, zoom],
     },
   });
@@ -134,7 +134,7 @@ export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
     billboard: true,
     pickable: false,
     updateTriggers: {
-      getText: [],
+      getText: [entries],
       getColor: [currentYear, selectedEntryId, zoom],
     },
   });

@@ -176,7 +176,7 @@ export default function App() {
   }
 
   const entryLayers = createEntryLayers({
-    entries: data.entries,
+    entries: translatedEntries,
     currentYear: appState.state.currentYear,
     eras: data.meta.eras,
     enabledSubjects: appState.state.enabledSubjects,
@@ -188,7 +188,7 @@ export default function App() {
   });
 
   const entryCardLayers = createEntryCardLayers({
-    entries: data.entries,
+    entries: translatedEntries,
     currentYear: appState.state.currentYear,
     eras: data.meta.eras,
     enabledSubjects: appState.state.enabledSubjects,
@@ -208,7 +208,7 @@ export default function App() {
   });
 
   const historyLayers = createHistoryLayers({
-    entries: data.entries,
+    entries: translatedEntries,
     currentYear: appState.state.currentYear,
     eras: data.meta.eras,
     showContextLayer: appState.state.showContextLayer,
