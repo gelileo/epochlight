@@ -1,9 +1,9 @@
-import { IconLayer, ScatterplotLayer } from '@deck.gl/layers';
+import { ScatterplotLayer } from '@deck.gl/layers';
 import type { Layer } from '@deck.gl/core';
 import type { Entry, Era } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
 
-interface HistoryLayerProps {
+export interface HistoryLayerProps {
   entries: Entry[];
   currentYear: number;
   eras: Era[];
@@ -15,42 +15,18 @@ interface HistoryLayerProps {
   pulseTime?: number;
 }
 
-const BRONZE: [number, number, number] = [192, 149, 108]; // #C0956C
+// Flame palette — visually distinct from science entry colors (blue/green/purple)
+const FLAME_OUTER: [number, number, number] = [224, 80, 32];   // deep red-orange ring
+const FLAME_INNER: [number, number, number] = [255, 180, 60];  // bright amber fill
 
-const TIER_SIZE: Record<1 | 2 | 3, number> = {
-  1: 28,
-  2: 22,
-  3: 16,
+const TIER_RADIUS: Record<1 | 2 | 3, number> = {
+  1: 14,
+  2: 10,
+  3: 7,
 };
 
-// Four-pointed starburst SVG as a data URL for entries without thumbnails
-const STARBURST_SVG = `data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-    <path d="M32 4 L36 26 L58 32 L36 38 L32 60 L28 38 L6 32 L28 26 Z"
-          fill="#C0956C" stroke="#A07A50" stroke-width="2"/>
-  </svg>`
-)}`;
-
-// Circular mask SVG template for thumbnail images — creates a bronze-bordered circle
-function makeThumbnailIconUrl(thumbUrl: string): string {
-  // We can't composite images in an SVG data URL due to cross-origin restrictions.
-  // Instead, we return the raw thumbnail URL and let IconLayer fetch it directly.
-  // The circular clipping + border is achieved via the icon mask approach below.
-  return thumbUrl;
-}
-
-/**
- * Zoom-based opacity: full at zoom <= 4, fading 4-6, hidden at >= 6.
- */
 function getZoomOpacity(zoom: number): number {
   return Math.max(0, Math.min(1, (6 - zoom) / 2));
-}
-
-/**
- * Check if an entry has a usable thumbnail URL.
- */
-function hasThumbnail(entry: Entry): boolean {
-  return !!(entry.media && entry.media.length > 0 && entry.media[0].thumbnail_url);
 }
 
 export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
@@ -75,32 +51,28 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
 
   const historyEntries = entries.filter((entry) => {
     if (entry.subject !== 'world-history') return false;
-    const isSelected = entry.id === selectedEntryId;
-    if (isSelected) return true;
+    if (entry.id === selectedEntryId) return true;
     return getEntryOpacity(entry.year, currentYear, windowWidth) > 0;
   });
 
-  // Split into thumbnail entries and starburst entries
-  const thumbnailEntries = historyEntries.filter(hasThumbnail);
-  const starburstEntries = historyEntries.filter((e) => !hasThumbnail(e));
+  if (historyEntries.length === 0) return [];
 
   const layers: Layer[] = [];
 
-  // --- Bronze glow behind all history entries ---
+  // --- Outer glow (soft flame halo) ---
   layers.push(
     new ScatterplotLayer<Entry>({
       id: 'history-glow',
       data: historyEntries,
       getPosition: (d) => [d.lng, d.lat],
       getRadius: (d) => {
-        const base = TIER_SIZE[d.tier];
-        const isSelected = d.id === selectedEntryId;
-        return (isSelected ? base * 1.3 : base) * 1.2;
+        const base = TIER_RADIUS[d.tier];
+        return (d.id === selectedEntryId ? base * 1.4 : base) * 2.2;
       },
       getFillColor: (d) => {
         const isSelected = d.id === selectedEntryId;
         const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
-        return [...BRONZE, Math.round(opacity * 0.25 * zoomOpacity * 255)] as [number, number, number, number];
+        return [...FLAME_INNER, Math.round(opacity * 0.15 * zoomOpacity * 255)] as [number, number, number, number];
       },
       radiusUnits: 'pixels' as const,
       pickable: false,
@@ -111,100 +83,46 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
     })
   );
 
-  // --- Bronze border ring behind thumbnails (acts as circular border) ---
-  if (thumbnailEntries.length > 0) {
-    layers.push(
-      new ScatterplotLayer<Entry>({
-        id: 'history-thumb-border',
-        data: thumbnailEntries,
-        getPosition: (d) => [d.lng, d.lat],
-        getRadius: (d) => {
-          const base = TIER_SIZE[d.tier] / 2 + 2; // slightly larger than icon
-          return d.id === selectedEntryId ? base * 1.3 : base;
-        },
-        getFillColor: (d) => {
-          const isSelected = d.id === selectedEntryId;
-          const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
-          return [...BRONZE, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
-        },
-        radiusUnits: 'pixels' as const,
-        pickable: false,
-        updateTriggers: {
-          getRadius: [selectedEntryId],
-          getFillColor: [currentYear, selectedEntryId, zoom],
-        },
-      })
-    );
-  }
-
-  // --- Thumbnail IconLayer (entries with media) ---
-  if (thumbnailEntries.length > 0) {
-    layers.push(
-      new IconLayer<Entry>({
-        id: 'history-thumbnails',
-        data: thumbnailEntries,
-        getPosition: (d) => [d.lng, d.lat],
-        getIcon: (d) => ({
-          url: makeThumbnailIconUrl(d.media![0].thumbnail_url!),
-          id: `thumb-${d.id}`,
-          width: 80,
-          height: 80,
-          anchorY: 40,
-        }),
-        getSize: (d) => {
-          const base = TIER_SIZE[d.tier];
-          return d.id === selectedEntryId ? base * 1.3 : base;
-        },
-        getColor: (d) => {
-          const isSelected = d.id === selectedEntryId;
-          const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
-          return [255, 255, 255, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
-        },
-        sizeUnits: 'pixels' as const,
-        pickable: true,
-        onClick: (info) => {
-          if (info.object) onEntryClick(info.object.id);
-        },
-        onHover: (info) => {
-          onEntryHover(info.object ?? null);
-        },
-        onIconError: () => {
-          // Silently fail — entry will not show thumbnail, but starburst entries
-          // are rendered separately so this entry just becomes invisible in this layer.
-          // A more robust approach would move it to starburstEntries on failure,
-          // but that requires re-render coordination.
-        },
-        updateTriggers: {
-          getSize: [selectedEntryId],
-          getColor: [currentYear, selectedEntryId, zoom],
-        },
-      })
-    );
-  }
-
-  // --- Starburst IconLayer (entries without media / fallback) ---
+  // --- Outer ring (deep red-orange border) ---
   layers.push(
-    new IconLayer<Entry>({
-      id: 'history-starbursts',
-      data: starburstEntries,
+    new ScatterplotLayer<Entry>({
+      id: 'history-ring',
+      data: historyEntries,
       getPosition: (d) => [d.lng, d.lat],
-      getIcon: () => ({
-        url: STARBURST_SVG,
-        id: 'starburst',
-        width: 64,
-        height: 64,
-        anchorY: 32,
-      }),
-      getSize: (d) => {
-        const base = TIER_SIZE[d.tier];
-        return d.id === selectedEntryId ? base * 1.3 : base;
+      getRadius: (d) => {
+        const base = TIER_RADIUS[d.tier];
+        return d.id === selectedEntryId ? base * 1.4 : base;
       },
-      getColor: (d) => {
+      getFillColor: (d) => {
         const isSelected = d.id === selectedEntryId;
         const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
-        return [255, 255, 255, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
+        return [...FLAME_OUTER, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
       },
-      sizeUnits: 'pixels' as const,
+      radiusUnits: 'pixels' as const,
+      pickable: false,
+      updateTriggers: {
+        getRadius: [selectedEntryId],
+        getFillColor: [currentYear, selectedEntryId, zoom],
+      },
+    })
+  );
+
+  // --- Inner fill (bright amber core, slightly smaller than ring) ---
+  layers.push(
+    new ScatterplotLayer<Entry>({
+      id: 'history-core',
+      data: historyEntries,
+      getPosition: (d) => [d.lng, d.lat],
+      getRadius: (d) => {
+        const base = TIER_RADIUS[d.tier] - 2.5;
+        return d.id === selectedEntryId ? base * 1.4 : base;
+      },
+      getFillColor: (d) => {
+        const isSelected = d.id === selectedEntryId;
+        const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
+        return [...FLAME_INNER, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
+      },
+      radiusUnits: 'pixels' as const,
       pickable: true,
       onClick: (info) => {
         if (info.object) onEntryClick(info.object.id);
@@ -213,33 +131,33 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
         onEntryHover(info.object ?? null);
       },
       updateTriggers: {
-        getSize: [selectedEntryId],
-        getColor: [currentYear, selectedEntryId, zoom],
+        getRadius: [selectedEntryId],
+        getFillColor: [currentYear, selectedEntryId, zoom],
       },
     })
   );
 
-  // --- Pulse ring around selected history entry ---
-  const selectedEntry = selectedEntryId
+  // --- Pulse ring around selected ---
+  const selectedArr = selectedEntryId
     ? historyEntries.filter((e) => e.id === selectedEntryId)
     : [];
 
-  if (selectedEntry.length > 0) {
+  if (selectedArr.length > 0) {
     const pulsePhase = (Math.sin(pulseTime * 0.004) + 1) / 2;
     layers.push(
       new ScatterplotLayer<Entry>({
         id: 'history-pulse',
-        data: selectedEntry,
+        data: selectedArr,
         getPosition: (d) => [d.lng, d.lat],
         getRadius: (d) => {
-          const base = TIER_SIZE[d.tier] / 2 * 1.3;
+          const base = TIER_RADIUS[d.tier] * 1.4;
           return base * (1.8 + pulsePhase * 1.2);
         },
         getFillColor: [0, 0, 0, 0],
         stroked: true,
         getLineColor: () => {
           const alpha = Math.round((1 - pulsePhase) * 0.7 * zoomOpacity * 255);
-          return [...BRONZE, alpha] as [number, number, number, number];
+          return [...FLAME_OUTER, alpha] as [number, number, number, number];
         },
         getLineWidth: 2,
         lineWidthMinPixels: 1.5,

@@ -64,6 +64,7 @@ interface MapViewProps {
   mapLabels?: MapLabelLevel;
   onViewStateChange?: (viewState: MapViewState) => void;
   onYearChange?: (year: number) => void;
+  children?: React.ReactNode;
 }
 
 export default function MapView({
@@ -75,6 +76,7 @@ export default function MapView({
   mapLabels = 'full',
   onViewStateChange,
   onYearChange,
+  children,
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
@@ -167,6 +169,7 @@ export default function MapView({
           style={{ width: '100%', height: '100%' }}
         >
           <DeckGLOverlay layers={layers} />
+          {children}
         </Map>
       </div>
 

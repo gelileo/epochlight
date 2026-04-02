@@ -6,7 +6,7 @@ interface HistoryToggleProps {
   visibleCount: number;
 }
 
-const BRONZE = '#C0956C';
+const FLAME = '#FF8C32';
 const MUTED = '#6b7280';
 
 const HistoryToggle: React.FC<HistoryToggleProps> = ({ enabled, onToggle, visibleCount }) => {
@@ -22,9 +22,9 @@ const HistoryToggle: React.FC<HistoryToggleProps> = ({ enabled, onToggle, visibl
     gap: 6,
     padding: '6px 14px',
     borderRadius: 20,
-    border: `1px solid ${enabled ? BRONZE : '#444'}`,
+    border: `1px solid ${enabled ? FLAME : '#444'}`,
     background: 'var(--chrome-bg, rgba(26, 26, 46, 0.92))',
-    color: enabled ? BRONZE : MUTED,
+    color: enabled ? FLAME : MUTED,
     fontSize: 13,
     fontFamily: 'inherit',
     cursor: 'pointer',
@@ -36,7 +36,7 @@ const HistoryToggle: React.FC<HistoryToggleProps> = ({ enabled, onToggle, visibl
 
   const iconStyle: React.CSSProperties = {
     fontSize: 14,
-    textShadow: enabled ? `0 0 6px ${BRONZE}` : 'none',
+    textShadow: enabled ? `0 0 6px ${FLAME}` : 'none',
     transition: 'text-shadow 200ms',
   };
 
