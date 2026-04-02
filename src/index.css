@@ -13,3 +13,46 @@ html, body, #root {
   width: 100%;
   height: 100%;
 }
+
+/* Google Translate widget — positioned as floating panel near side panel */
+#google_translate_element {
+  position: fixed;
+  top: 50px;
+  right: 430px;
+  z-index: 1001;
+  background: var(--chrome-bg, rgba(30, 30, 50, 0.96));
+  border: 1px solid var(--chrome-border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+/* Hidden state: off-screen but still in layout so Google Translate can init */
+#google_translate_element.gtranslate-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#google_translate_element.gtranslate-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#google_translate_element .goog-te-gadget {
+  font-size: 0 !important;
+  color: transparent !important;
+}
+
+#google_translate_element .goog-te-gadget .goog-te-combo {
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--chrome-border, rgba(255, 255, 255, 0.15));
+  background: transparent;
+  color: var(--chrome-text, #ddd);
+  cursor: pointer;
+  font-family: inherit;
+}

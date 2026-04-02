@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Entry, Subject } from '../types';
 import { SUBJECT_COLORS } from '../types';
 import './SidePanel.css';
@@ -56,12 +56,18 @@ export default function SidePanel({
   onNavigateToEntry,
 }: SidePanelProps) {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const isOpen = entry !== null;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [translateVisible, setTranslateVisible] = useState(false);
 
   // Focus close button when panel opens
   useEffect(() => {
     if (isOpen && closeBtnRef.current) {
       closeBtnRef.current.focus();
+    }
+    if (!isOpen) {
+      setMenuOpen(false);
     }
   }, [isOpen]);
 
@@ -71,6 +77,55 @@ export default function SidePanel({
       (document.activeElement as HTMLElement)?.blur?.();
     }
   }, [isOpen]);
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
+
+  // Toggle the Google Translate widget visibility
+  useEffect(() => {
+    const el = document.getElementById('google_translate_element');
+    if (!el) return;
+    if (translateVisible && isOpen) {
+      el.classList.remove('gtranslate-hidden');
+      el.classList.add('gtranslate-visible');
+    } else {
+      el.classList.remove('gtranslate-visible');
+      el.classList.add('gtranslate-hidden');
+    }
+  }, [translateVisible, isOpen]);
+
+  // Auto-hide translator when Google Translate is turned off
+  // (Google adds/removes 'translated-*' class on <html>)
+  useEffect(() => {
+    if (!translateVisible) return;
+    const observer = new MutationObserver(() => {
+      const html = document.documentElement;
+      const isTranslated = html.classList.contains('translated-ltr') ||
+                           html.classList.contains('translated-rtl');
+      if (!isTranslated) {
+        setTranslateVisible(false);
+      }
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => observer.disconnect();
+  }, [translateVisible]);
+
+  const handleTranslateClick = useCallback(() => {
+    setTranslateVisible((v) => !v);
+    setMenuOpen(false);
+  }, []);
 
   const icon = entry?.media_hint
     ? MEDIA_HINT_ICONS[entry.media_hint] ?? DEFAULT_ICON
@@ -89,14 +144,36 @@ export default function SidePanel({
       >
         {entry && (
           <>
-            <button
-              ref={closeBtnRef}
-              className="side-panel__close"
-              onClick={onClose}
-              aria-label="Close panel"
-            >
-              &#x2715;
-            </button>
+            <div className="side-panel__toolbar">
+              <div className="side-panel__menu-container" ref={menuRef}>
+                <button
+                  className="side-panel__menu-btn"
+                  onClick={() => setMenuOpen((v) => !v)}
+                  aria-label="More options"
+                  aria-expanded={menuOpen}
+                >
+                  ⋯
+                </button>
+                {menuOpen && (
+                  <div className="side-panel__menu-dropdown">
+                    <button
+                      className="side-panel__menu-item"
+                      onClick={handleTranslateClick}
+                    >
+                      🌐 {translateVisible ? 'Hide translator' : 'Translate page'}
+                    </button>
+                  </div>
+                )}
+              </div>
+              <button
+                ref={closeBtnRef}
+                className="side-panel__close"
+                onClick={onClose}
+                aria-label="Close panel"
+              >
+                &#x2715;
+              </button>
+            </div>
             <div className="side-panel__content">
               <div className="side-panel__header">
                 <span
