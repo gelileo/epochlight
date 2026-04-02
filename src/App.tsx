@@ -204,10 +204,12 @@ export default function App() {
         currentYear={appState.state.currentYear}
         eras={data.meta.eras}
       />
-      <SearchBar
-        entries={data.entries}
-        onNavigate={handleNavigateToEntry}
-      />
+      {!selectedEntry && (
+        <SearchBar
+          entries={data.entries}
+          onNavigate={handleNavigateToEntry}
+        />
+      )}
       <ScrubberBar
         currentYear={appState.state.currentYear}
         onYearChange={appState.setYear}
