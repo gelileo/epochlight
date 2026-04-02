@@ -160,7 +160,7 @@ export default function SidePanel({
                       className="side-panel__menu-item"
                       onClick={handleTranslateClick}
                     >
-                      🌐 {translateVisible ? 'Hide translator' : 'Translate page'}
+                      🌐 {translateVisible ? 'Hide Translator' : 'Translate Page'}
                     </button>
                   </div>
                 )}

@@ -35,6 +35,7 @@ jobs:
         run: npm run build:data
         env:
           EPOCHLIGHT_DATA_SOURCE: github
+          GITHUB_TOKEN: ${{ secrets.DATA_REPO_TOKEN }}
 
       - name: Build app
         run: npx vite build

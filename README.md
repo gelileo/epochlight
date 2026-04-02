@@ -125,66 +125,29 @@ The app deploys automatically to GitHub Pages on push to `main` via the included
 
 1. Go to **Settings > Pages** in your GitHub repo
 2. Set **Source** to **GitHub Actions**
-3. Add your Mapbox token as a repository secret:
-   - Go to **Settings > Secrets and variables > Actions**
-   - Create `VITE_MAPBOX_TOKEN` with your public token (`pk.xxx`)
+3. Add repository secrets at **Settings > Secrets and variables > Actions**:
+   - `VITE_MAPBOX_TOKEN` — your Mapbox public token (`pk.xxx`)
+   - `DATA_REPO_TOKEN` — a fine-grained GitHub PAT with **Contents: Read-only** access to `gelileo/epochlight-data` (only needed if the data repo is private)
 4. Push to `main` — the workflow builds and deploys automatically
 
 ### Manual deploy
 
 You can also trigger a deploy manually from the **Actions** tab using "Run workflow".
 
-## Project Structure
-
-```
-epochlight/
-  .github/workflows/deploy.yml   GitHub Pages deployment
-  scripts/build-data.py           Data pipeline (fetch, transform, cache)
-  public/
-    data/epochlight-data.json     Generated data file (not committed)
-    favicon.svg                   Light bulb favicon
-  src/
-    components/
-      MapView.tsx                 Deck.gl + Mapbox GL map with era filters
-      EraOverlay.tsx              Era tint, vignette, and label toast
-      ScrubberBar.tsx             Time cursor with piecewise linear scale
-      SidePanel.tsx               Entry details with translate menu
-      SubjectPills.tsx            Subject filter toggles
-      SearchBar.tsx               Full-text search
-      OnboardingTooltips.tsx      First-visit walkthrough
-      AriaAnnouncer.tsx           Screen reader announcements
-      LoadingScreen.tsx           Loading state
-      ErrorScreen.tsx             Error with retry
-      EmptyState.tsx              Empty state messages
-    layers/
-      EntryLayer.ts               Glowing dot nodes + pulse animation
-      EntryCardLayer.ts           Zoom-dependent mini-cards
-      ConnectionLayer.ts          Arc connections + ghost nodes
-    hooks/
-      useAppState.ts              Central state management
-      useEpochlightData.ts        Data fetching
-      useEraTheme.ts              Era-adaptive CSS custom properties
-      useUrlState.ts              URL hash sync
-    utils/
-      timeWindow.ts               Era lookup, window width, opacity
-      scrubberScale.ts            Piecewise linear year-to-pixel mapping
-      search.ts                   Full-text search
-      analytics.ts                Plausible event tracking
-    styles/
-      era-themes.ts               7 era visual theme definitions
-    types.ts                      TypeScript interfaces + subject colors
-
-  .data-cache/                    Cached data files (not committed)
-  .env.local                      Mapbox token (not committed)
-```
-
 ## Environment Variables
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `VITE_MAPBOX_TOKEN` | Yes | Mapbox public access token (`pk.xxx`) |
+| `VITE_MAPBOX_TOKEN` | Yes | Mapbox public access token (`pk.xxx`). Set in `.env.local` for local dev |
 | `EPOCHLIGHT_DATA_SOURCE` | No | Force `local` or `github` data source |
-| `GITHUB_TOKEN` | No | GitHub token for private repos or rate limits |
+| `GITHUB_TOKEN` | No | GitHub PAT for fetching from a private data repo |
+
+### GitHub Actions Secrets
+
+| Secret | Required | Description |
+| --- | --- | --- |
+| `VITE_MAPBOX_TOKEN` | Yes | Mapbox public token for the production build |
+| `DATA_REPO_TOKEN` | If data repo is private | Fine-grained PAT with Contents read access to `epochlight-data` |
 
 ## npm Scripts
 
@@ -206,10 +169,6 @@ epochlight/
 | `Page Up / Page Down` | Jump to previous/next era |
 | `/` | Focus search bar |
 | `Escape` | Close side panel or clear search |
-
-## Related
-
-- [epochlight-data](https://github.com/gelileo/epochlight-data) — The curated dataset of 734 entries across 7 subjects
 
 ## License
 
