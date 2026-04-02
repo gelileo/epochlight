@@ -394,6 +394,28 @@ def main():
     print(f"  Output: {OUTPUT_FILE}")
     print(f"  Entries: {output['meta']['entry_count']}")
     print(f"  Size: {file_size / 1024:.1f} KB")
+
+    # 7. Merge per-subject translation files into one per language
+    translations_src = LOCAL_DATA_DIR.parent / "translations"
+    translations_dst = APP_DIR / "public" / "data" / "translations"
+    if translations_src.exists():
+        translations_dst.mkdir(parents=True, exist_ok=True)
+        for lang_dir in translations_src.iterdir():
+            if not lang_dir.is_dir():
+                continue
+            merged: dict = {}
+            for f in sorted(lang_dir.glob("*.json")):
+                with open(f, encoding="utf-8") as fh:
+                    merged.update(json.load(fh))
+            if merged:
+                out_path = translations_dst / f"{lang_dir.name}.json"
+                with open(out_path, "w", encoding="utf-8") as fh:
+                    json.dump(merged, fh, ensure_ascii=False, separators=(",", ":"))
+                size_kb = out_path.stat().st_size / 1024
+                print(f"  Translation: {lang_dir.name}.json ({len(merged)} entries, {size_kb:.1f} KB)")
+    else:
+        print("  No translations directory found — skipping")
+
     print("=" * 60)
 
 

@@ -18,6 +18,8 @@ import { createConnectionLayers } from './layers/ConnectionLayer';
 import { createHistoryLayers } from './layers/HistoryLayer';
 import { getEntryOpacity, getWindowWidth } from './utils/timeWindow';
 import { useEraTheme } from './hooks/useEraTheme';
+import { useLocale } from './hooks/useLocale';
+import { useTranslatedEntries } from './hooks/useTranslatedEntries';
 import { trackEvent } from './utils/analytics';
 import type { Entry, Subject } from './types';
 import type { MapViewState } from '@deck.gl/core';
@@ -26,6 +28,7 @@ const initialUrlState = parseHash(window.location.hash);
 
 export default function App() {
   const { data, loading, error, refetch } = useEpochlightData();
+  const { locale } = useLocale();
   const appState = useAppState(initialUrlState);
   const [hoveredEntry, setHoveredEntry] = useState<Entry | null>(null);
   const [zoom, setZoom] = useState(2);
@@ -132,6 +135,9 @@ export default function App() {
   // Apply era-adaptive visual theme (CSS custom properties on :root)
   const eraTheme = useEraTheme(appState.state.currentYear, data?.meta.eras ?? []);
 
+  // Apply content translations (lazy-loaded for non-English locales)
+  const translatedEntries = useTranslatedEntries(data?.entries ?? [], locale);
+
   // Compute empty state flags (must be before early returns so hooks aren't conditional)
   const allSubjectsDisabled = appState.state.enabledSubjects.size === 0;
   const noEntriesInWindow = useMemo(() => {
@@ -215,7 +221,7 @@ export default function App() {
   const allLayers = [...connectionLayers, ...historyLayers, ...entryLayers, ...entryCardLayers];
 
   const selectedEntry = appState.state.selectedEntryId
-    ? data.entries.find((e) => e.id === appState.state.selectedEntryId) ?? null
+    ? translatedEntries.find((e) => e.id === appState.state.selectedEntryId) ?? null
     : null;
 
   return (
@@ -238,7 +244,7 @@ export default function App() {
         showContextLayer={appState.state.showContextLayer}
         onToggleContextLayer={appState.toggleContextLayer}
         visibleHistoryCount={visibleHistoryCount}
-        entries={data.entries}
+        entries={translatedEntries}
         onNavigate={handleNavigateToEntry}
         currentYear={appState.state.currentYear}
         eras={data.meta.eras}
@@ -259,7 +265,7 @@ export default function App() {
         allSubjectsDisabled={allSubjectsDisabled}
       />
       <HistoryTicker
-        entries={data.entries}
+        entries={translatedEntries}
         currentYear={appState.state.currentYear}
         eras={data.meta.eras}
         showContextLayer={appState.state.showContextLayer}
