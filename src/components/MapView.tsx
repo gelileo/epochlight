@@ -1,8 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Map, useControl } from 'react-map-gl/mapbox';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import type { Layer, MapViewState } from '@deck.gl/core';
+import type { MapRef } from 'react-map-gl/mapbox';
 import type { Entry, Era } from '../types';
+import type { MapLabelLevel } from '../styles/era-themes';
 import { getEraForYear } from '../utils/timeWindow';
 import EraOverlay from './EraOverlay';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -25,11 +27,41 @@ function DeckGLOverlay({ layers }: { layers: Layer[] }) {
   return null;
 }
 
+/**
+ * Apply label visibility to the Mapbox map based on era.
+ * - 'none': hide all text labels (pure geographic map)
+ * - 'minimal': show only continent/ocean labels, hide countries/cities
+ * - 'full': show all labels normally
+ */
+function applyLabelLevel(map: mapboxgl.Map, level: MapLabelLevel) {
+  const style = map.getStyle();
+  if (!style?.layers) return;
+
+  for (const layer of style.layers) {
+    if (layer.type !== 'symbol') continue;
+    const id = layer.id;
+
+    if (level === 'none') {
+      // Hide all text labels
+      map.setLayoutProperty(id, 'visibility', 'none');
+    } else if (level === 'minimal') {
+      // Show only large geographic labels (continents, oceans, seas)
+      const isGeo = /continent|ocean|sea|water-label/i.test(id);
+      map.setLayoutProperty(id, 'visibility', isGeo ? 'visible' : 'none');
+    } else {
+      // full — show everything
+      map.setLayoutProperty(id, 'visibility', 'visible');
+    }
+  }
+}
+
 interface MapViewProps {
   currentYear: number;
   eras: Era[];
   layers?: Layer[];
   hoveredEntry?: Entry | null;
+  mapStyle?: string;
+  mapLabels?: MapLabelLevel;
   onViewStateChange?: (viewState: MapViewState) => void;
   onYearChange?: (year: number) => void;
 }
@@ -39,11 +71,15 @@ export default function MapView({
   eras,
   layers = [],
   hoveredEntry,
+  mapStyle = 'mapbox://styles/mapbox/light-v11',
+  mapLabels = 'full',
   onViewStateChange,
   onYearChange,
 }: MapViewProps) {
+  const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
   const [pointerPos, setPointerPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const handleMove = useCallback(
     (evt: { viewState: MapViewState }) => {
@@ -52,6 +88,28 @@ export default function MapView({
     },
     [onViewStateChange],
   );
+
+  // Apply label visibility when mapLabels changes or map style reloads
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+    const map = mapRef.current.getMap();
+    // Style may still be loading after a style switch — wait for idle
+    const apply = () => applyLabelLevel(map, mapLabels);
+    if (map.isStyleLoaded()) {
+      apply();
+    } else {
+      map.once('idle', apply);
+    }
+  }, [mapLabels, mapLoaded, mapStyle]);
+
+  const handleStyleData = useCallback(() => {
+    // Re-apply labels after every style load (style switch triggers this)
+    if (mapRef.current) {
+      const map = mapRef.current.getMap();
+      // Defer to next tick so all layers are present
+      setTimeout(() => applyLabelLevel(map, mapLabels), 50);
+    }
+  }, [mapLabels]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -98,10 +156,13 @@ export default function MapView({
         }}
       >
         <Map
+          ref={mapRef}
           {...viewState}
           onMove={handleMove}
+          onLoad={() => setMapLoaded(true)}
+          onStyleData={handleStyleData}
           mapboxAccessToken={MAPBOX_TOKEN}
-          mapStyle="mapbox://styles/mapbox/light-v11"
+          mapStyle={mapStyle}
           projection={{ name: 'mercator' }}
           style={{ width: '100%', height: '100%' }}
         >

@@ -115,7 +115,7 @@ export default function App() {
   );
 
   // Apply era-adaptive visual theme (CSS custom properties on :root)
-  useEraTheme(appState.state.currentYear, data?.meta.eras ?? []);
+  const eraTheme = useEraTheme(appState.state.currentYear, data?.meta.eras ?? []);
 
   // Compute empty state flags (must be before early returns so hooks aren't conditional)
   const allSubjectsDisabled = appState.state.enabledSubjects.size === 0;
@@ -190,6 +190,8 @@ export default function App() {
         eras={data.meta.eras}
         layers={allLayers}
         hoveredEntry={hoveredEntry}
+        mapStyle={eraTheme.mapStyle}
+        mapLabels={eraTheme.mapLabels}
         onViewStateChange={handleViewStateChange}
         onYearChange={appState.setYear}
       />
