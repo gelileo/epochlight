@@ -1,0 +1,65 @@
+{
+  "loading.title": "EPOCHLIGHT",
+  "loading.message": "Cargando la línea de tiempo...",
+
+  "error.message": "No se pudieron cargar los datos",
+  "error.submessage": "Comprueba tu conexión e inténtalo de nuevo.",
+  "error.retry": "Reintentar",
+
+  "empty.allSubjectsDisabled": "Activa al menos una materia para ver entradas en el mapa.",
+  "empty.noEntriesInWindow": "No hay entradas en este periodo. Prueba a avanzar o activar más materias.",
+
+  "subjects.header": "Materias",
+  "subjects.enableAll": "Todas",
+  "subjects.disableAll": "Ninguna",
+  "subjects.mathematics": "Matemáticas",
+  "subjects.physics": "Física",
+  "subjects.chemistry": "Química",
+  "subjects.medicineBiology": "Medicina y Biología",
+  "subjects.inventionsEngineering": "Ingeniería e Inventos",
+  "subjects.astronomyCosmology": "Astronomía y Cosmología",
+  "subjects.philosophyLogic": "Filosofía y Lógica",
+  "subjects.worldHistory": "Historia Universal",
+
+  "search.placeholder": "Buscar... ( / )",
+  "search.empty": "Ninguna entrada coincide con tu búsqueda.",
+
+  "sidePanel.contextLabel": "Contexto Histórico",
+  "sidePanel.tier": "Nivel {tier}",
+  "sidePanel.impact": "Impacto",
+  "sidePanel.people": "Personas",
+  "sidePanel.attribution": "Atribución",
+  "sidePanel.connections": "Conexiones",
+  "sidePanel.supersededBy": "Sustituido por",
+  "sidePanel.tags": "Etiquetas",
+  "sidePanel.references": "Referencias",
+  "sidePanel.translate": "Traducir Página",
+  "sidePanel.hideTranslator": "Ocultar Traductor",
+
+  "era.prehistoric": "Prehistoria",
+  "era.ancient": "Mundo Antiguo",
+  "era.classical": "Era Clásica",
+  "era.medieval": "Mundo Medieval",
+  "era.early-modern": "Edad Moderna Temprana",
+  "era.modern": "Era Moderna",
+  "era.contemporary": "Contemporáneo",
+
+  "historyToggle.label": "Contexto Histórico",
+
+  "onboarding.step1": "Arrastra para viajar en el tiempo — o simplemente desplázate",
+  "onboarding.step2": "Haz clic en cualquier punto para explorar un descubrimiento",
+  "onboarding.step3": "Filtra por materia para enfocar tu exploración",
+  "onboarding.skip": "Omitir",
+  "onboarding.next": "Siguiente",
+  "onboarding.done": "Listo",
+
+  "yearFormat.bce": "{year} a.C.",
+  "yearFormat.ce": "{year} d.C.",
+
+  "aria.mapLabel": "Mapa interactivo de la línea de tiempo",
+  "aria.scrubberLabel": "Cursor de la línea de tiempo",
+  "aria.searchLabel": "Buscar entradas",
+  "aria.closePanel": "Cerrar panel",
+  "aria.eraTransition": "Entrando en {era}, {start}–{end}",
+  "aria.entrySelected": "Seleccionado: {title}, {year}, {subject}"
+}

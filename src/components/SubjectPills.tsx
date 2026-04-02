@@ -3,6 +3,7 @@ import type { Entry, Era, Subject } from '../types';
 import { SUBJECT_COLORS } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
 import { trackEvent } from '../utils/analytics';
+import { useLocale } from '../hooks/useLocale';
 import './SubjectPills.css';
 
 const ALL_SUBJECTS: Subject[] = [
@@ -15,14 +16,14 @@ const ALL_SUBJECTS: Subject[] = [
   'philosophy-logic',
 ];
 
-const SUBJECT_DISPLAY_NAMES: Record<Subject, string> = {
-  mathematics: 'Mathematics',
-  physics: 'Physics',
-  chemistry: 'Chemistry',
-  'medicine-biology': 'Medicine & Biology',
-  'inventions-engineering': 'Engineering & Inventions',
-  'astronomy-cosmology': 'Astronomy & Cosmology',
-  'philosophy-logic': 'Philosophy & Logic',
+const SUBJECT_LOCALE_KEYS: Record<string, string> = {
+  mathematics: 'subjects.mathematics',
+  physics: 'subjects.physics',
+  chemistry: 'subjects.chemistry',
+  'medicine-biology': 'subjects.medicineBiology',
+  'inventions-engineering': 'subjects.inventionsEngineering',
+  'astronomy-cosmology': 'subjects.astronomyCosmology',
+  'philosophy-logic': 'subjects.philosophyLogic',
 };
 
 interface SubjectPillsProps {
@@ -44,6 +45,7 @@ export default function SubjectPills({
   currentYear,
   eras,
 }: SubjectPillsProps) {
+  const { t } = useLocale();
   const windowWidth = getWindowWidth(currentYear, eras);
 
   const visibleCounts = useMemo(() => {
@@ -69,7 +71,7 @@ export default function SubjectPills({
           ≡
         </span>
         <span>
-          Subjects {enabledCount}/{ALL_SUBJECTS.length}
+          {t('subjects.header')} {enabledCount}/{ALL_SUBJECTS.length}
         </span>
       </div>
       <div className="subject-pills__body">
@@ -82,7 +84,7 @@ export default function SubjectPills({
                 className={`subject-pills__item${enabled ? '' : ' subject-pills__item--disabled'}`}
                 role="switch"
                 aria-checked={enabled}
-                aria-label={`Toggle ${SUBJECT_DISPLAY_NAMES[subject]}`}
+                aria-label={`Toggle ${t(SUBJECT_LOCALE_KEYS[subject])}`}
                 tabIndex={0}
                 onClick={() => {
                   const isNowEnabled = !enabledSubjects.has(subject);
@@ -103,7 +105,7 @@ export default function SubjectPills({
                   style={{ backgroundColor: SUBJECT_COLORS[subject] }}
                 />
                 <span className="subject-pills__label">
-                  {SUBJECT_DISPLAY_NAMES[subject]}
+                  {t(SUBJECT_LOCALE_KEYS[subject])}
                 </span>
                 <span className="subject-pills__count">
                   {visibleCounts[subject]}
@@ -120,7 +122,7 @@ export default function SubjectPills({
               onEnableAll();
             }}
           >
-            All
+            {t('subjects.enableAll')}
           </button>
           <button
             className="subject-pills__shortcut-btn"
@@ -129,7 +131,7 @@ export default function SubjectPills({
               onDisableAll();
             }}
           >
-            None
+            {t('subjects.disableAll')}
           </button>
         </div>
       </div>

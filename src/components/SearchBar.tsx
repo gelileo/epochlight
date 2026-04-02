@@ -3,6 +3,7 @@ import type { Entry } from '../types';
 import { SUBJECT_COLORS } from '../types';
 import { searchEntries } from '../utils/search';
 import { trackEvent } from '../utils/analytics';
+import { useLocale } from '../hooks/useLocale';
 
 interface SearchBarProps {
   entries: Entry[];
@@ -15,6 +16,7 @@ function formatYear(year: number): string {
 }
 
 export default function SearchBar({ entries, onNavigate }: SearchBarProps) {
+  const { t } = useLocale();
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -148,8 +150,8 @@ export default function SearchBar({ entries, onNavigate }: SearchBarProps) {
           aria-activedescendant={
             activeIndex >= 0 ? `search-result-${activeIndex}` : undefined
           }
-          aria-label="Search entries"
-          placeholder="Search... ( / )"
+          aria-label={t('aria.searchLabel')}
+          placeholder={t('search.placeholder')}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -170,7 +172,7 @@ export default function SearchBar({ entries, onNavigate }: SearchBarProps) {
           style={styles.dropdown}
         >
           {results.length === 0 ? (
-            <li style={styles.emptyState}>No entries match your search.</li>
+            <li style={styles.emptyState}>{t('search.empty')}</li>
           ) : (
             results.map((entry, i) => (
               <li

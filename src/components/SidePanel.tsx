@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Entry, Subject } from '../types';
 import { SUBJECT_COLORS } from '../types';
+import { useLocale } from '../hooks/useLocale';
 import './SidePanel.css';
 
 export interface SidePanelProps {
@@ -55,6 +56,7 @@ export default function SidePanel({
   onClose,
   onNavigateToEntry,
 }: SidePanelProps) {
+  const { t } = useLocale();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const isOpen = entry !== null;
@@ -166,7 +168,7 @@ export default function SidePanel({
                       className="side-panel__menu-item"
                       onClick={handleTranslateClick}
                     >
-                      🌐 {translateVisible ? 'Hide Translator' : 'Translate Page'}
+                      🌐 {translateVisible ? t('sidePanel.hideTranslator') : t('sidePanel.translate')}
                     </button>
                   </div>
                 )}
@@ -175,7 +177,7 @@ export default function SidePanel({
                 ref={closeBtnRef}
                 className="side-panel__close"
                 onClick={onClose}
-                aria-label="Close panel"
+                aria-label={t('aria.closePanel')}
               >
                 &#x2715;
               </button>
@@ -206,13 +208,13 @@ export default function SidePanel({
               <div className="side-panel__header">
                 {entry.subject === 'world-history' ? (
                   <span className="side-panel__context-label">
-                    Historical Context
+                    {t('sidePanel.contextLabel')}
                   </span>
                 ) : (
                   <span
                     className={`side-panel__tier-badge side-panel__tier-badge--${entry.tier}`}
                   >
-                    Tier {entry.tier}
+                    {t('sidePanel.tier', { tier: entry.tier })}
                   </span>
                 )}
                 <div className="side-panel__icon">{icon}</div>
@@ -243,7 +245,7 @@ export default function SidePanel({
               {/* Impact */}
               {entry.impact && (
                 <div className="side-panel__section">
-                  <div className="side-panel__section-title">Impact</div>
+                  <div className="side-panel__section-title">{t('sidePanel.impact')}</div>
                   <p className="side-panel__impact">{entry.impact}</p>
                 </div>
               )}
@@ -252,7 +254,7 @@ export default function SidePanel({
               {(entry.persons.length > 0 || entry.attribution_note) && (
                 <div className="side-panel__section">
                   <div className="side-panel__section-title">
-                    {entry.persons.length > 0 ? 'People' : 'Attribution'}
+                    {entry.persons.length > 0 ? t('sidePanel.people') : t('sidePanel.attribution')}
                   </div>
                   {entry.persons.length > 0
                     ? entry.persons.map((person, idx) => (
@@ -284,7 +286,7 @@ export default function SidePanel({
               {/* Connections */}
               {entry.connections.length > 0 && (
                 <div className="side-panel__section">
-                  <div className="side-panel__section-title">Connections</div>
+                  <div className="side-panel__section-title">{t('sidePanel.connections')}</div>
                   {entry.connections.map((conn) => (
                     <div key={conn.id} className="side-panel__connection">
                       <span
@@ -315,7 +317,7 @@ export default function SidePanel({
               {/* Superseded by */}
               {entry.superseded_by && (
                 <div className="side-panel__section">
-                  <div className="side-panel__section-title">Superseded by</div>
+                  <div className="side-panel__section-title">{t('sidePanel.supersededBy')}</div>
                   <div className="side-panel__connection">
                     <span
                       className="side-panel__connection-dot"
@@ -349,7 +351,7 @@ export default function SidePanel({
               {/* Tags */}
               {entry.tags.length > 0 && (
                 <div className="side-panel__section">
-                  <div className="side-panel__section-title">Tags</div>
+                  <div className="side-panel__section-title">{t('sidePanel.tags')}</div>
                   <div className="side-panel__tags">
                     {entry.tags.map((tag) => (
                       <span key={tag} className="side-panel__tag">
@@ -363,7 +365,7 @@ export default function SidePanel({
               {/* References */}
               {entry.references.length > 0 && (
                 <div className="side-panel__section">
-                  <div className="side-panel__section-title">References</div>
+                  <div className="side-panel__section-title">{t('sidePanel.references')}</div>
                   {entry.references.map((ref, idx) => (
                     <a
                       key={idx}

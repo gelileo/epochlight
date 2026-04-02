@@ -1,3 +1,5 @@
+import { useLocale } from '../hooks/useLocale';
+
 interface EmptyStateProps {
   noEntriesInWindow: boolean;
   allSubjectsDisabled: boolean;
@@ -31,11 +33,12 @@ const styles: Record<string, React.CSSProperties> = {
 };
 
 export default function EmptyState({ noEntriesInWindow, allSubjectsDisabled }: EmptyStateProps) {
+  const { t } = useLocale();
   if (!noEntriesInWindow && !allSubjectsDisabled) return null;
 
   const message = allSubjectsDisabled
-    ? 'Enable at least one subject to see entries on the map.'
-    : 'No entries in this period. Try scrolling forward or enabling more subjects.';
+    ? t('empty.allSubjectsDisabled')
+    : t('empty.noEntriesInWindow');
 
   return (
     <div style={styles.overlay}>

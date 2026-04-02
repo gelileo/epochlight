@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocale } from '../hooks/useLocale';
 
 interface HistoryToggleProps {
   enabled: boolean;
@@ -10,6 +11,7 @@ const FLAME = '#FF8C32';
 const MUTED = '#6b7280';
 
 const HistoryToggle: React.FC<HistoryToggleProps> = ({ enabled, onToggle, visibleCount }) => {
+  const { t } = useLocale();
   const [hovered, setHovered] = React.useState(false);
 
   const containerStyle: React.CSSProperties = {
@@ -48,11 +50,11 @@ const HistoryToggle: React.FC<HistoryToggleProps> = ({ enabled, onToggle, visibl
       onMouseLeave={() => setHovered(false)}
       style={containerStyle}
       aria-pressed={enabled}
-      aria-label={`Historical Context${enabled ? ` - ${visibleCount} visible` : ''}`}
+      aria-label={`${t('historyToggle.label')}${enabled ? ` - ${visibleCount} visible` : ''}`}
     >
       <span style={iconStyle}>&#x2726;</span>
       <span>
-        Historical Context{enabled && visibleCount > 0 ? ` \u00B7 ${visibleCount}` : ''}
+        {t('historyToggle.label')}{enabled && visibleCount > 0 ? ` \u00B7 ${visibleCount}` : ''}
       </span>
     </button>
   );

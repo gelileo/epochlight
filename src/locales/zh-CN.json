@@ -1,0 +1,65 @@
+{
+  "loading.title": "EPOCHLIGHT",
+  "loading.message": "正在加载时间线...",
+
+  "error.message": "无法加载时间线数据",
+  "error.submessage": "请检查网络连接后重试。",
+  "error.retry": "重试",
+
+  "empty.allSubjectsDisabled": "请至少启用一个学科以查看地图上的条目。",
+  "empty.noEntriesInWindow": "该时期暂无条目。请尝试向前滚动或启用更多学科。",
+
+  "subjects.header": "学科",
+  "subjects.enableAll": "全选",
+  "subjects.disableAll": "清除",
+  "subjects.mathematics": "数学",
+  "subjects.physics": "物理学",
+  "subjects.chemistry": "化学",
+  "subjects.medicineBiology": "医学与生物学",
+  "subjects.inventionsEngineering": "工程与发明",
+  "subjects.astronomyCosmology": "天文学与宇宙学",
+  "subjects.philosophyLogic": "哲学与逻辑学",
+  "subjects.worldHistory": "世界历史",
+
+  "search.placeholder": "搜索... ( / )",
+  "search.empty": "没有匹配的条目。",
+
+  "sidePanel.contextLabel": "历史背景",
+  "sidePanel.tier": "第 {tier} 级",
+  "sidePanel.impact": "影响",
+  "sidePanel.people": "相关人物",
+  "sidePanel.attribution": "归属",
+  "sidePanel.connections": "关联条目",
+  "sidePanel.supersededBy": "被取代",
+  "sidePanel.tags": "标签",
+  "sidePanel.references": "参考文献",
+  "sidePanel.translate": "翻译页面",
+  "sidePanel.hideTranslator": "隐藏翻译",
+
+  "era.prehistoric": "史前时代",
+  "era.ancient": "古代文明",
+  "era.classical": "古典时代",
+  "era.medieval": "中世纪",
+  "era.early-modern": "近代早期",
+  "era.modern": "近代",
+  "era.contemporary": "当代",
+
+  "historyToggle.label": "历史背景",
+
+  "onboarding.step1": "拖动可穿越时间——也可以直接滚动",
+  "onboarding.step2": "点击任意节点探索一项发现",
+  "onboarding.step3": "按学科筛选以聚焦探索方向",
+  "onboarding.skip": "跳过",
+  "onboarding.next": "下一步",
+  "onboarding.done": "完成",
+
+  "yearFormat.bce": "公元前 {year} 年",
+  "yearFormat.ce": "公元 {year} 年",
+
+  "aria.mapLabel": "交互式时间线地图",
+  "aria.scrubberLabel": "时间光标",
+  "aria.searchLabel": "搜索条目",
+  "aria.closePanel": "关闭面板",
+  "aria.eraTransition": "正在进入{era}，{start}–{end}",
+  "aria.entrySelected": "已选择：{title}，{year}，{subject}"
+}

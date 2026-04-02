@@ -1,3 +1,5 @@
+import { useLocale } from '../hooks/useLocale';
+
 interface ErrorScreenProps {
   onRetry: () => void;
 }
@@ -42,11 +44,12 @@ const styles: Record<string, React.CSSProperties> = {
 };
 
 export default function ErrorScreen({ onRetry }: ErrorScreenProps) {
+  const { t } = useLocale();
   return (
     <div style={styles.container}>
       <div style={styles.icon}>⚠️</div>
-      <div style={styles.message}>Couldn't load timeline data</div>
-      <div style={styles.subMessage}>Check your connection and try again.</div>
+      <div style={styles.message}>{t('error.message')}</div>
+      <div style={styles.subMessage}>{t('error.submessage')}</div>
       <button
         style={styles.button}
         onClick={onRetry}
@@ -59,7 +62,7 @@ export default function ErrorScreen({ onRetry }: ErrorScreenProps) {
           e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
         }}
       >
-        Retry
+        {t('error.retry')}
       </button>
     </div>
   );

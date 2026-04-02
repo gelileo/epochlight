@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useLocale } from '../hooks/useLocale';
 
 const STORAGE_KEY = 'epochlight-onboarded';
 
 interface TooltipStep {
-  message: string;
+  messageKey: string;
   position: (viewport: { width: number; height: number }) => React.CSSProperties;
   arrowPosition: 'bottom' | 'top' | 'left';
 }
 
 const STEPS: TooltipStep[] = [
   {
-    message: 'Drag to travel through time — or just scroll',
+    messageKey: 'onboarding.step1',
     arrowPosition: 'bottom',
     position: ({ width }) => ({
       left: width / 2,
@@ -19,7 +20,7 @@ const STEPS: TooltipStep[] = [
     }),
   },
   {
-    message: 'Click any point to explore a discovery',
+    messageKey: 'onboarding.step2',
     arrowPosition: 'top',
     position: ({ width, height }) => ({
       left: width / 2,
@@ -28,7 +29,7 @@ const STEPS: TooltipStep[] = [
     }),
   },
   {
-    message: 'Filter by subject to focus your exploration',
+    messageKey: 'onboarding.step3',
     arrowPosition: 'left',
     position: () => ({
       left: 260,
@@ -38,6 +39,7 @@ const STEPS: TooltipStep[] = [
 ];
 
 export default function OnboardingTooltips() {
+  const { t } = useLocale();
   const [step, setStep] = useState(-1);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
 
@@ -150,7 +152,7 @@ export default function OnboardingTooltips() {
             }}
           />
 
-          <p style={{ margin: '0 0 14px 0' }}>{current.message}</p>
+          <p style={{ margin: '0 0 14px 0' }}>{t(current.messageKey)}</p>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             {/* Step indicator */}
@@ -181,7 +183,7 @@ export default function OnboardingTooltips() {
                   padding: '4px 8px',
                 }}
               >
-                Skip
+                {t('onboarding.skip')}
               </button>
               <button
                 onClick={next}
@@ -196,7 +198,7 @@ export default function OnboardingTooltips() {
                   fontWeight: 500,
                 }}
               >
-                {step === STEPS.length - 1 ? 'Done' : 'Next'}
+                {step === STEPS.length - 1 ? t('onboarding.done') : t('onboarding.next')}
               </button>
             </div>
           </div>

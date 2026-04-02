@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import App from './App';
+import { LocaleProvider } from './hooks/useLocale';
 import type { EpochlightData } from './types';
 
 // Mock WebGL-dependent modules
@@ -203,19 +204,19 @@ describe('App integration smoke test', () => {
   });
 
   it('renders the loading screen initially', () => {
-    render(<App />);
+    render(<LocaleProvider><App /></LocaleProvider>);
     expect(screen.getByText('Loading timeline...')).toBeInTheDocument();
   });
 
   it('loading screen disappears after data loads', async () => {
-    render(<App />);
+    render(<LocaleProvider><App /></LocaleProvider>);
     await waitFor(() => {
       expect(screen.queryByText('Loading timeline...')).not.toBeInTheDocument();
     });
   });
 
   it('renders without crashing after data loads (no error screen)', async () => {
-    render(<App />);
+    render(<LocaleProvider><App /></LocaleProvider>);
     await waitFor(() => {
       expect(screen.queryByText('Loading timeline...')).not.toBeInTheDocument();
     });

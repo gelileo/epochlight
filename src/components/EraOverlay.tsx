@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Era } from '../types';
 import { getEraForYear } from '../utils/timeWindow';
 import { ERA_THEMES } from '../styles/era-themes';
+import { useLocale } from '../hooks/useLocale';
 
 interface EraOverlayProps {
   currentYear: number;
@@ -9,6 +10,7 @@ interface EraOverlayProps {
 }
 
 export default function EraOverlay({ currentYear, eras }: EraOverlayProps) {
+  const { t } = useLocale();
   const era = useMemo(() => getEraForYear(currentYear, eras), [currentYear, eras]);
   const theme = ERA_THEMES[era.style] ?? ERA_THEMES['clean']!;
 
@@ -20,7 +22,7 @@ export default function EraOverlay({ currentYear, eras }: EraOverlayProps) {
   useEffect(() => {
     if (era.id !== prevEraId.current) {
       prevEraId.current = era.id;
-      setToastLabel(era.label);
+      setToastLabel(t(`era.${era.id}`));
       setToastVisible(true);
 
       const timer = setTimeout(() => {
@@ -29,7 +31,7 @@ export default function EraOverlay({ currentYear, eras }: EraOverlayProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [era.id, era.label]);
+  }, [era.id, t]);
 
   return (
     <>

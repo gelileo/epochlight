@@ -11,6 +11,7 @@ import SearchBar from './components/SearchBar';
 import AriaAnnouncer from './components/AriaAnnouncer';
 import HistoryToggle from './components/HistoryToggle';
 import HistoryTicker from './components/HistoryTicker';
+import LanguagePicker from './components/LanguagePicker';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorScreen from './components/ErrorScreen';
 import EmptyState from './components/EmptyState';
@@ -275,6 +276,7 @@ export default function App() {
         isInteracting={isScrubbing || hoveredEntry !== null}
         sidePanelOpen={selectedEntry !== null}
       />
+      <LanguagePicker />
       <OnboardingTooltips />
       <AriaAnnouncer
         currentYear={appState.state.currentYear}

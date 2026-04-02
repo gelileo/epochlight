@@ -1,3 +1,5 @@
+import { useLocale } from '../hooks/useLocale';
+
 const styles: Record<string, React.CSSProperties> = {
   container: {
     position: 'fixed',
@@ -34,6 +36,7 @@ const styles: Record<string, React.CSSProperties> = {
 };
 
 export default function LoadingScreen() {
+  const { t } = useLocale();
   return (
     <div style={styles.container}>
       <style>{`
@@ -41,9 +44,9 @@ export default function LoadingScreen() {
           to { transform: rotate(360deg); }
         }
       `}</style>
-      <div style={styles.title}>EPOCHLIGHT</div>
+      <div style={styles.title}>{t('loading.title')}</div>
       <div style={styles.spinner} />
-      <div style={styles.subtitle}>Loading timeline...</div>
+      <div style={styles.subtitle}>{t('loading.message')}</div>
     </div>
   );
 }

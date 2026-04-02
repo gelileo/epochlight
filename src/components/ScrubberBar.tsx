@@ -5,6 +5,7 @@ import {
   pixelToYear,
   getEraSegments,
 } from '../utils/scrubberScale';
+import { useLocale } from '../hooks/useLocale';
 
 
 interface ScrubberBarProps {
@@ -53,6 +54,7 @@ export default function ScrubberBar({
   eras,
   entries,
 }: ScrubberBarProps) {
+  const { t } = useLocale();
   const barRef = useRef<HTMLDivElement>(null);
   const [barWidth, setBarWidth] = useState(1000);
   const [isDragging, setIsDragging] = useState(false);
@@ -301,7 +303,7 @@ export default function ScrubberBar({
               maxWidth: seg.endPx - seg.startPx - 12,
             }}
           >
-            {seg.era.label}
+            {t(`era.${seg.era.id}`)}
           </div>
           {/* Tick at end for last segment */}
           {i === segments.length - 1 && (

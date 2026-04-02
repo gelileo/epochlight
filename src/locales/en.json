@@ -1,0 +1,65 @@
+{
+  "loading.title": "EPOCHLIGHT",
+  "loading.message": "Loading timeline...",
+
+  "error.message": "Couldn't load timeline data",
+  "error.submessage": "Check your connection and try again.",
+  "error.retry": "Retry",
+
+  "empty.allSubjectsDisabled": "Enable at least one subject to see entries on the map.",
+  "empty.noEntriesInWindow": "No entries in this period. Try scrolling forward or enabling more subjects.",
+
+  "subjects.header": "Subjects",
+  "subjects.enableAll": "All",
+  "subjects.disableAll": "None",
+  "subjects.mathematics": "Mathematics",
+  "subjects.physics": "Physics",
+  "subjects.chemistry": "Chemistry",
+  "subjects.medicineBiology": "Medicine & Biology",
+  "subjects.inventionsEngineering": "Engineering & Inventions",
+  "subjects.astronomyCosmology": "Astronomy & Cosmology",
+  "subjects.philosophyLogic": "Philosophy & Logic",
+  "subjects.worldHistory": "World History",
+
+  "search.placeholder": "Search... ( / )",
+  "search.empty": "No entries match your search.",
+
+  "sidePanel.contextLabel": "Historical Context",
+  "sidePanel.tier": "Tier {tier}",
+  "sidePanel.impact": "Impact",
+  "sidePanel.people": "People",
+  "sidePanel.attribution": "Attribution",
+  "sidePanel.connections": "Connections",
+  "sidePanel.supersededBy": "Superseded by",
+  "sidePanel.tags": "Tags",
+  "sidePanel.references": "References",
+  "sidePanel.translate": "Translate Page",
+  "sidePanel.hideTranslator": "Hide Translator",
+
+  "era.prehistoric": "Prehistoric",
+  "era.ancient": "Ancient World",
+  "era.classical": "Classical Era",
+  "era.medieval": "Medieval World",
+  "era.early-modern": "Early Modern",
+  "era.modern": "Modern Era",
+  "era.contemporary": "Contemporary",
+
+  "historyToggle.label": "Historical Context",
+
+  "onboarding.step1": "Drag to travel through time — or just scroll",
+  "onboarding.step2": "Click any point to explore a discovery",
+  "onboarding.step3": "Filter by subject to focus your exploration",
+  "onboarding.skip": "Skip",
+  "onboarding.next": "Next",
+  "onboarding.done": "Done",
+
+  "yearFormat.bce": "{year} BCE",
+  "yearFormat.ce": "{year} CE",
+
+  "aria.mapLabel": "Interactive timeline map",
+  "aria.scrubberLabel": "Timeline cursor",
+  "aria.searchLabel": "Search entries",
+  "aria.closePanel": "Close panel",
+  "aria.eraTransition": "Now entering the {era}, {start}–{end}",
+  "aria.entrySelected": "Selected: {title}, {year}, {subject}"
+}
