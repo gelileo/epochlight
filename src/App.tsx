@@ -6,12 +6,9 @@ import MapView from './components/MapView';
 import ScrubberBar from './components/ScrubberBar';
 import SidePanel from './components/SidePanel';
 import OnboardingTooltips from './components/OnboardingTooltips';
-import SubjectPills from './components/SubjectPills';
-import SearchBar from './components/SearchBar';
+import ControlPanel from './components/ControlPanel';
 import AriaAnnouncer from './components/AriaAnnouncer';
-import HistoryToggle from './components/HistoryToggle';
 import HistoryTicker from './components/HistoryTicker';
-import LanguagePicker from './components/LanguagePicker';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorScreen from './components/ErrorScreen';
 import EmptyState from './components/EmptyState';
@@ -233,26 +230,19 @@ export default function App() {
         onViewStateChange={handleViewStateChange}
         onYearChange={appState.setYear}
       />
-      <SubjectPills
+      <ControlPanel
         enabledSubjects={appState.state.enabledSubjects}
         onToggleSubject={appState.toggleSubject}
         onEnableAll={appState.enableAllSubjects}
         onDisableAll={appState.disableAllSubjects}
+        showContextLayer={appState.state.showContextLayer}
+        onToggleContextLayer={appState.toggleContextLayer}
+        visibleHistoryCount={visibleHistoryCount}
         entries={data.entries}
+        onNavigate={handleNavigateToEntry}
         currentYear={appState.state.currentYear}
         eras={data.meta.eras}
       />
-      <HistoryToggle
-        enabled={appState.state.showContextLayer}
-        onToggle={appState.toggleContextLayer}
-        visibleCount={visibleHistoryCount}
-      />
-      {!selectedEntry && (
-        <SearchBar
-          entries={data.entries}
-          onNavigate={handleNavigateToEntry}
-        />
-      )}
       <ScrubberBar
         currentYear={appState.state.currentYear}
         onYearChange={appState.setYear}
@@ -276,7 +266,6 @@ export default function App() {
         isInteracting={isScrubbing || hoveredEntry !== null}
         sidePanelOpen={selectedEntry !== null}
       />
-      <LanguagePicker />
       <OnboardingTooltips />
       <AriaAnnouncer
         currentYear={appState.state.currentYear}
