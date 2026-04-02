@@ -9,12 +9,15 @@ import OnboardingTooltips from './components/OnboardingTooltips';
 import SubjectPills from './components/SubjectPills';
 import SearchBar from './components/SearchBar';
 import AriaAnnouncer from './components/AriaAnnouncer';
+import HistoryToggle from './components/HistoryToggle';
+import HistoryTicker from './components/HistoryTicker';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorScreen from './components/ErrorScreen';
 import EmptyState from './components/EmptyState';
 import { createEntryLayers } from './layers/EntryLayer';
 import { createEntryCardLayers } from './layers/EntryCardLayer';
 import { createConnectionLayers } from './layers/ConnectionLayer';
+import { createHistoryLayers } from './layers/HistoryLayer';
 import { getEntryOpacity, getWindowWidth } from './utils/timeWindow';
 import { useEraTheme } from './hooks/useEraTheme';
 import { trackEvent } from './utils/analytics';
@@ -30,6 +33,20 @@ export default function App() {
   const [zoom, setZoom] = useState(2);
   const [pulseTime, setPulseTime] = useState(0);
   const rafRef = useRef<number>(0);
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const scrubTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Track scrubbing: set true on year change, reset after 500ms idle
+  const prevYearRef = useRef(appState.state.currentYear);
+  useEffect(() => {
+    if (appState.state.currentYear !== prevYearRef.current) {
+      prevYearRef.current = appState.state.currentYear;
+      setIsScrubbing(true);
+      if (scrubTimerRef.current) clearTimeout(scrubTimerRef.current);
+      scrubTimerRef.current = setTimeout(() => setIsScrubbing(false), 500);
+    }
+    return () => { if (scrubTimerRef.current) clearTimeout(scrubTimerRef.current); };
+  }, [appState.state.currentYear]);
 
   // Animate pulse when an entry is selected
   useEffect(() => {
@@ -133,6 +150,15 @@ export default function App() {
     });
   }, [data, appState.state.currentYear, appState.state.enabledSubjects, allSubjectsDisabled]);
 
+  const visibleHistoryCount = useMemo(() => {
+    if (!data || !appState.state.showContextLayer) return 0;
+    const w = getWindowWidth(appState.state.currentYear, data.meta.eras);
+    return data.entries.filter((e) => {
+      if (e.subject !== 'world-history') return false;
+      return getEntryOpacity(e.year, appState.state.currentYear, w) > 0;
+    }).length;
+  }, [data, appState.state.currentYear, appState.state.showContextLayer]);
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -177,7 +203,18 @@ export default function App() {
     onEntryClick: handleGhostNodeClick,
   });
 
-  const allLayers = [...connectionLayers, ...entryLayers, ...entryCardLayers];
+  const historyLayers = createHistoryLayers({
+    entries: data.entries,
+    currentYear: appState.state.currentYear,
+    eras: data.meta.eras,
+    showContextLayer: appState.state.showContextLayer,
+    selectedEntryId: appState.state.selectedEntryId,
+    onEntryClick: handleEntryClick,
+    onEntryHover: handleEntryHover,
+    zoom,
+  });
+
+  const allLayers = [...connectionLayers, ...historyLayers, ...entryLayers, ...entryCardLayers];
 
   const selectedEntry = appState.state.selectedEntryId
     ? data.entries.find((e) => e.id === appState.state.selectedEntryId) ?? null
@@ -204,6 +241,11 @@ export default function App() {
         currentYear={appState.state.currentYear}
         eras={data.meta.eras}
       />
+      <HistoryToggle
+        enabled={appState.state.showContextLayer}
+        onToggle={appState.toggleContextLayer}
+        visibleCount={visibleHistoryCount}
+      />
       {!selectedEntry && (
         <SearchBar
           entries={data.entries}
@@ -224,6 +266,14 @@ export default function App() {
       <EmptyState
         noEntriesInWindow={noEntriesInWindow}
         allSubjectsDisabled={allSubjectsDisabled}
+      />
+      <HistoryTicker
+        entries={data.entries}
+        currentYear={appState.state.currentYear}
+        eras={data.meta.eras}
+        showContextLayer={appState.state.showContextLayer}
+        isInteracting={isScrubbing || hoveredEntry !== null}
+        sidePanelOpen={selectedEntry !== null}
       />
       <OnboardingTooltips />
       <AriaAnnouncer

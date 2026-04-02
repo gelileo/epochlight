@@ -60,6 +60,12 @@ export default function SidePanel({
   const isOpen = entry !== null;
   const [menuOpen, setMenuOpen] = useState(false);
   const [translateVisible, setTranslateVisible] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Reset image error state when entry changes
+  useEffect(() => {
+    setImageError(false);
+  }, [entry?.id]);
 
   // Focus close button when panel opens
   useEffect(() => {
@@ -175,12 +181,40 @@ export default function SidePanel({
               </button>
             </div>
             <div className="side-panel__content">
+              {entry.media && entry.media.length > 0 && !imageError && (
+                <div className="side-panel__hero">
+                  <img
+                    className="side-panel__hero-img"
+                    src={entry.media[0].url}
+                    alt={entry.media[0].caption ?? entry.title}
+                    onError={() => setImageError(true)}
+                  />
+                  {entry.media[0].caption && (
+                    <div className="side-panel__hero-caption">
+                      {entry.media[0].caption}
+                    </div>
+                  )}
+                  {(entry.media[0].license || entry.media[0].source) && (
+                    <div className="side-panel__hero-license">
+                      {[entry.media[0].license, entry.media[0].source]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="side-panel__header">
-                <span
-                  className={`side-panel__tier-badge side-panel__tier-badge--${entry.tier}`}
-                >
-                  Tier {entry.tier}
-                </span>
+                {entry.subject === 'world-history' ? (
+                  <span className="side-panel__context-label">
+                    Historical Context
+                  </span>
+                ) : (
+                  <span
+                    className={`side-panel__tier-badge side-panel__tier-badge--${entry.tier}`}
+                  >
+                    Tier {entry.tier}
+                  </span>
+                )}
                 <div className="side-panel__icon">{icon}</div>
                 <h2 className="side-panel__title">{entry.title}</h2>
                 <div className="side-panel__year">

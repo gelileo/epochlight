@@ -10,6 +10,7 @@ const ALL_SUBJECTS: Subject[] = [
   'inventions-engineering',
   'astronomy-cosmology',
   'philosophy-logic',
+  'world-history',
 ];
 
 const VALID_SUBJECTS = new Set<string>(ALL_SUBJECTS);
@@ -43,6 +44,11 @@ export function parseHash(hash: string): AppStateInit {
         result.selectedEntryId = entryId;
       }
       i++;
+    } else if (segments[i] === 'context' && i + 1 < segments.length) {
+      const val = segments[i + 1];
+      if (val === 'off') result.showContextLayer = false;
+      else if (val === 'on') result.showContextLayer = true;
+      i++;
     } else if (segments[i] === 'subjects' && i + 1 < segments.length) {
       const subjectStr = segments[i + 1];
       if (subjectStr === 'all') {
@@ -67,6 +73,10 @@ function buildHash(state: AppState): string {
 
   if (state.selectedEntryId) {
     parts.push(`/entry/${state.selectedEntryId}`);
+  }
+
+  if (!state.showContextLayer) {
+    parts.push('/context/off');
   }
 
   const enabledArr = ALL_SUBJECTS.filter((s) => state.enabledSubjects.has(s));

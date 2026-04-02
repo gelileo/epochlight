@@ -38,6 +38,7 @@ export interface AppStateInit {
   year?: number;
   selectedEntryId?: string | null;
   enabledSubjects?: Subject[];
+  showContextLayer?: boolean;
 }
 
 export function useAppState(init?: AppStateInit): AppStateResult {
@@ -48,7 +49,7 @@ export function useAppState(init?: AppStateInit): AppStateResult {
       ? new Set(init.enabledSubjects)
       : new Set(ALL_SUBJECTS),
     showKnowledgeFlow: false,
-    showContextLayer: true,
+    showContextLayer: init?.showContextLayer ?? true,
   }));
 
   const setYear = useCallback((year: number) => {

@@ -81,14 +81,24 @@ export default function ScrubberBar({
   const minYear = eras.length > 0 ? eras[0].start : 0;
   const maxYear = eras.length > 0 ? eras[eras.length - 1].end : 100;
 
-  // Histogram data: entry density per bucket within each era
+  // Histogram data: entry density per bucket within each era, split by subject
   const histogramBars = useMemo(() => {
-    const bars: { x: number; width: number; height: number }[] = [];
+    const bars: {
+      x: number;
+      width: number;
+      scienceHeight: number;
+      historyHeight: number;
+    }[] = [];
     if (segments.length === 0 || entries.length === 0) return bars;
 
-    // Find max count for normalization
+    // Find max total count for normalization
     let maxCount = 0;
-    const allBuckets: { x: number; w: number; count: number }[] = [];
+    const allBuckets: {
+      x: number;
+      w: number;
+      scienceCount: number;
+      historyCount: number;
+    }[] = [];
 
     for (const seg of segments) {
       const segWidth = seg.endPx - seg.startPx;
@@ -104,24 +114,34 @@ export default function ScrubberBar({
           seg.era.start + (b / bucketCount) * eraSpan;
         const yearEnd =
           seg.era.start + ((b + 1) / bucketCount) * eraSpan;
-        const count = entries.filter(
+        const inRange = entries.filter(
           (e) => e.year >= yearStart && e.year < yearEnd,
+        );
+        const historyCount = inRange.filter(
+          (e) => e.subject === 'world-history',
         ).length;
+        const scienceCount = inRange.length - historyCount;
+        const total = scienceCount + historyCount;
         allBuckets.push({
           x: seg.startPx + b * bucketWidthPx,
           w: bucketWidthPx,
-          count,
+          scienceCount,
+          historyCount,
         });
-        if (count > maxCount) maxCount = count;
+        if (total > maxCount) maxCount = total;
       }
     }
 
     for (const bucket of allBuckets) {
-      if (bucket.count === 0) continue;
+      const total = bucket.scienceCount + bucket.historyCount;
+      if (total === 0) continue;
       bars.push({
         x: bucket.x,
         width: bucket.w,
-        height: (bucket.count / maxCount) * HISTOGRAM_HEIGHT,
+        scienceHeight:
+          (bucket.scienceCount / maxCount) * HISTOGRAM_HEIGHT,
+        historyHeight:
+          (bucket.historyCount / maxCount) * HISTOGRAM_HEIGHT,
       });
     }
 
@@ -300,7 +320,7 @@ export default function ScrubberBar({
         </div>
       ))}
 
-      {/* Density histogram */}
+      {/* Density histogram — stacked: science (bottom) + history (top) */}
       {histogramBars.map((bar, i) => (
         <div
           key={i}
@@ -309,12 +329,35 @@ export default function ScrubberBar({
             left: bar.x,
             width: Math.max(1, bar.width - 1),
             bottom: 4,
-            height: bar.height,
-            backgroundColor: 'var(--histogram-color, rgba(80, 160, 230, 0.65))',
-            borderRadius: 2,
+            height: bar.scienceHeight + bar.historyHeight,
             pointerEvents: 'none',
+            display: 'flex',
+            flexDirection: 'column',
           }}
-        />
+        >
+          {/* History segment (top) */}
+          {bar.historyHeight > 0 && (
+            <div
+              style={{
+                width: '100%',
+                height: bar.historyHeight,
+                backgroundColor: 'rgba(192, 149, 108, 0.5)',
+                borderRadius: bar.scienceHeight > 0 ? '2px 2px 0 0' : 2,
+              }}
+            />
+          )}
+          {/* Science segment (bottom) */}
+          {bar.scienceHeight > 0 && (
+            <div
+              style={{
+                width: '100%',
+                height: bar.scienceHeight,
+                backgroundColor: 'var(--histogram-color, rgba(80, 160, 230, 0.65))',
+                borderRadius: bar.historyHeight > 0 ? '0 0 2px 2px' : 2,
+              }}
+            />
+          )}
+        </div>
       ))}
 
       {/* Year badge floating above handle */}
