@@ -27,6 +27,7 @@ vi.mock('@deck.gl/layers', () => ({
   ScatterplotLayer: class ScatterplotLayer {},
   ArcLayer: class ArcLayer {},
   TextLayer: class TextLayer {},
+  IconLayer: class IconLayer {},
 }));
 
 vi.mock('@deck.gl/core', () => ({
