@@ -17,6 +17,7 @@ export interface AppState {
   selectedEntryId: string | null;
   enabledSubjects: Set<Subject>;
   showKnowledgeFlow: boolean;
+  showContextLayer: boolean;
 }
 
 export interface AppStateActions {
@@ -26,6 +27,7 @@ export interface AppStateActions {
   enableAllSubjects: () => void;
   disableAllSubjects: () => void;
   toggleKnowledgeFlow: () => void;
+  toggleContextLayer: () => void;
 }
 
 export interface AppStateResult extends AppStateActions {
@@ -46,6 +48,7 @@ export function useAppState(init?: AppStateInit): AppStateResult {
       ? new Set(init.enabledSubjects)
       : new Set(ALL_SUBJECTS),
     showKnowledgeFlow: false,
+    showContextLayer: true,
   }));
 
   const setYear = useCallback((year: number) => {
@@ -84,6 +87,14 @@ export function useAppState(init?: AppStateInit): AppStateResult {
     });
   }, []);
 
+  const toggleContextLayer = useCallback(() => {
+    setState((prev) => {
+      const enabled = !prev.showContextLayer;
+      trackEvent('context_layer_toggled', { enabled: enabled ? 1 : 0 });
+      return { ...prev, showContextLayer: enabled };
+    });
+  }, []);
+
   return {
     state,
     setYear,
@@ -92,5 +103,6 @@ export function useAppState(init?: AppStateInit): AppStateResult {
     enableAllSubjects,
     disableAllSubjects,
     toggleKnowledgeFlow,
+    toggleContextLayer,
   };
 }

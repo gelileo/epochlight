@@ -32,6 +32,7 @@ export interface Entry {
   connections: ConnectionRef[];
   superseded_by: ConnectionRef | null;
   references: { title: string; url: string }[];
+  media?: MediaItem[];
 }
 
 export type Subject =
@@ -41,7 +42,17 @@ export type Subject =
   | 'medicine-biology'
   | 'inventions-engineering'
   | 'astronomy-cosmology'
-  | 'philosophy-logic';
+  | 'philosophy-logic'
+  | 'world-history';
+
+export interface MediaItem {
+  type: 'image';
+  url: string;
+  thumbnail_url?: string;
+  caption?: string;
+  license?: string;
+  source?: string;
+}
 
 export interface Era {
   id: string;
@@ -71,4 +82,5 @@ export const SUBJECT_COLORS: Record<Subject, string> = {
   'inventions-engineering': '#D9A84A',
   'astronomy-cosmology': '#8A5CD9',
   'philosophy-logic': '#4ABCD9',
+  'world-history': '#C0956C',
 };

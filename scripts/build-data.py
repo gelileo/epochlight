@@ -45,6 +45,7 @@ SUBJECT_FILES = [
     "inventions-engineering.json",
     "astronomy-cosmology.json",
     "philosophy-logic.json",
+    "world-history.json",
 ]
 
 DATA_FILES = SUBJECT_FILES + ["geocoding.json"]
@@ -63,7 +64,7 @@ ENTRY_FIELDS = [
     "id", "year", "year_end", "year_precision", "title", "description",
     "persons", "attribution_note", "lat", "lng", "civilization", "subject",
     "secondary_subjects", "tags", "tier", "impact", "media_hint",
-    "connections", "superseded_by", "references",
+    "connections", "superseded_by", "references", "media",
 ]
 
 
