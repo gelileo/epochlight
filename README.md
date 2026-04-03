@@ -1,6 +1,6 @@
 # Epochlight
 
-An interactive map-based timeline that visualizes the evolution of human knowledge across civilizations — from prehistoric tool-making to modern breakthroughs. Explore 734 curated entries spanning 7 subjects, scrub through time, and follow the threads of discovery as they arc across the globe.
+An interactive map-based timeline that visualizes the evolution of human knowledge across civilizations — from prehistoric tool-making to modern breakthroughs. Explore 855 curated entries spanning 7 science subjects plus 121 world history events, scrub through time, and follow the threads of discovery as they arc across the globe.
 
 **Live demo:** [gelileo.github.io/epochlight](https://gelileo.github.io/epochlight)
 
@@ -15,9 +15,12 @@ An interactive map-based timeline that visualizes the evolution of human knowled
 - **Ghost nodes** — Connected entries outside the time window appear as dim clickable nodes that jump you to their era
 - **Zoom-dependent rendering** — Dots at world zoom, titled mini-cards at regional zoom, with smooth crossfade
 - **Side panel** — Full entry details with description, impact, persons, connections, tags, and references
+- **World history context layer** — 121 historical events with category icons (war, empire, politics, religion, exploration, trade, culture, revolution)
+- **Scrubber zoom** — Click an era label to zoom in for year-by-year precision, with entry tick marks and always-on labels (scholar tier)
+- **Internationalization** — UI chrome in English, Chinese, and Spanish; content translations for all 855 entries
 - **Google Translate** — Built-in translation via the side panel menu for non-English users
 - **Search** — Full-text search across titles, descriptions, persons, and tags (`/` shortcut to focus)
-- **Subject filtering** — Toggle subjects on/off via hover-expandable pills with live entry counts
+- **Subject filtering** — Toggle subjects on/off via the unified control panel with live entry counts
 - **Deep linking** — Full app state encoded in URL hash for shareable views
 - **Map labels** — Hidden for ancient eras (no anachronistic modern nations), gradually appearing for modern eras
 - **Accessibility** — ARIA roles, screen reader announcements, keyboard navigation, tier shapes for colorblind support
@@ -81,7 +84,7 @@ The app fetches its data from the [epochlight-data](https://github.com/gelileo/e
 
 ```
 epochlight-data (separate repo)         epochlight (this repo)
-  data/*.json (734 entries)    --->     scripts/build-data.py
+  data/*.json (855 entries)    --->     scripts/build-data.py
   data/geocoding.json                     |
   data/manifest.json                      v
                                         public/data/epochlight-data.json
@@ -160,6 +163,32 @@ You can also trigger a deploy manually from the **Actions** tab using "Run workf
 | `npm run preview` | Preview production build |
 | `npx vitest run` | Run all tests |
 
+## Feature Tiers
+
+The app has a two-tier system: **free** and **scholar**. Scholar-tier features include scrubber zoom (precise mode), knowledge flow arcs, translated content, hero images, and mini-cards.
+
+Since there is no backend or payment system yet, the tier is determined by (in priority order):
+
+1. **URL parameter** `?tier=scholar` or `?tier=free`
+2. **localStorage** key `epochlight-tier` (persisted from prior session)
+3. **Default:** `free`
+
+### Testing Scholar Features
+
+Append `?tier=scholar` to the URL:
+
+```
+http://localhost:5173/?tier=scholar
+```
+
+The tier is persisted to localStorage, so you only need to set it once per browser. To reset:
+
+```
+http://localhost:5173/?tier=free
+```
+
+When the backend is implemented (see [Infrastructure Roadmap](.notes/infrastructure-roadmap.md)), the tier will be determined by a JWT from the auth/payment system.
+
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -167,8 +196,16 @@ You can also trigger a deploy manually from the **Actions** tab using "Run workf
 | `Scroll wheel` | Travel through time |
 | `Left / Right arrows` | Move cursor by 1 year (adaptive per era) |
 | `Page Up / Page Down` | Jump to previous/next era |
+| `Enter` | Zoom into current era on scrubber (scholar tier) |
+| `Escape` | Zoom out of scrubber / close side panel / clear search |
 | `/` | Focus search bar |
-| `Escape` | Close side panel or clear search |
+
+## Documentation
+
+- [Map Layer Architecture](docs/map-layer-architecture.md) — visual layer stack, rendering behavior, interactions
+- [Scrubber Zoom Design](.notes/scrubber-zoom-design.md) — design options and implementation plan
+- [Tier System Design](.notes/tier-system-design.md) — two-tier paywall architecture
+- [Infrastructure Roadmap](.notes/infrastructure-roadmap.md) — migration plan from static site to cloud-hosted
 
 ## License
 

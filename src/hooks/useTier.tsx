@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 export type Tier = 'free' | 'scholar';
 
 const FEATURE_TIERS: Record<string, Tier> = {
-  'scrubber-zoom': 'free',
+  'scrubber-zoom': 'scholar',
   'knowledge-flow': 'scholar',
   'translated-content': 'scholar',
   'hero-images': 'scholar',
@@ -30,10 +30,29 @@ interface TierContextValue {
 const TierContext = createContext<TierContextValue | null>(null);
 
 /**
- * Reads the stored tier from localStorage.
- * Phase 2 will validate a JWT here; for now just reads a plain string.
+ * Determines the user's tier. Checked in order:
+ * 1. URL parameter ?tier=scholar (for testing/preview links)
+ * 2. localStorage 'epochlight-tier' (persisted from prior session)
+ * 3. Default: 'free'
+ *
+ * If the URL sets a tier, it's also persisted to localStorage so it
+ * survives page navigation within the session.
+ * Phase 2 will validate a JWT from the backend instead.
  */
 function readStoredTier(): Tier {
+  // Check URL parameter first
+  const params = new URLSearchParams(window.location.search);
+  const urlTier = params.get('tier');
+  if (urlTier === 'scholar') {
+    localStorage.setItem('epochlight-tier', 'scholar');
+    return 'scholar';
+  }
+  if (urlTier === 'free') {
+    localStorage.setItem('epochlight-tier', 'free');
+    return 'free';
+  }
+
+  // Fall back to localStorage
   const stored = localStorage.getItem('epochlight-tier');
   if (stored === 'scholar') return 'scholar';
   return 'free';
