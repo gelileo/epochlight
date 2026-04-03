@@ -396,9 +396,14 @@ def main():
     print(f"  Size: {file_size / 1024:.1f} KB")
 
     # 7. Merge per-subject translation files into one per language
-    translations_src = LOCAL_DATA_DIR.parent / "translations"
     translations_dst = APP_DIR / "public" / "data" / "translations"
+    translations_src = LOCAL_DATA_DIR.parent / "translations"
+
+    TRANSLATION_LANGS = ["zh-CN", "es"]
+    TRANSLATION_SUBJECTS = [f.replace(".json", "") for f in SUBJECT_FILES]
+
     if translations_src.exists():
+        # Local: read from sibling directory
         translations_dst.mkdir(parents=True, exist_ok=True)
         for lang_dir in translations_src.iterdir():
             if not lang_dir.is_dir():
@@ -414,7 +419,33 @@ def main():
                 size_kb = out_path.stat().st_size / 1024
                 print(f"  Translation: {lang_dir.name}.json ({len(merged)} entries, {size_kb:.1f} KB)")
     else:
-        print("  No translations directory found — skipping")
+        # Remote: fetch translation files from GitHub
+        translations_base = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/translations"
+        any_found = False
+        for lang in TRANSLATION_LANGS:
+            merged: dict = {}
+            for subj in TRANSLATION_SUBJECTS:
+                url = f"{translations_base}/{lang}/{subj}.json"
+                try:
+                    req = urllib.request.Request(url)
+                    token = os.environ.get("GITHUB_TOKEN")
+                    if token:
+                        req.add_header("Authorization", f"token {token}")
+                    with urllib.request.urlopen(req, timeout=30) as resp:
+                        data = json.loads(resp.read())
+                        merged.update(data)
+                except (urllib.error.URLError, json.JSONDecodeError):
+                    pass  # subject file may not exist for this language
+            if merged:
+                translations_dst.mkdir(parents=True, exist_ok=True)
+                out_path = translations_dst / f"{lang}.json"
+                with open(out_path, "w", encoding="utf-8") as fh:
+                    json.dump(merged, fh, ensure_ascii=False, separators=(",", ":"))
+                size_kb = out_path.stat().st_size / 1024
+                print(f"  Translation: {lang}.json ({len(merged)} entries, {size_kb:.1f} KB)")
+                any_found = True
+        if not any_found:
+            print("  No translations found — skipping")
 
     print("=" * 60)
 
