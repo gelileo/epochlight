@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <mask id="cross-outline-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+    <rect width="64" height="64" fill="black"/>
+    <rect x="28" y="9" width="8" height="44" rx="3.5" fill="white"/>
+    <rect x="15" y="21" width="34" height="10" rx="3.5" fill="white"/>
+    <rect x="31" y="13" width="2" height="36" rx="1.5" fill="black"/>
+    <rect x="19" y="24" width="26" height="4" rx="1.5" fill="black"/>
+  </mask>
+  <rect width="64" height="64" fill="#A855F7" mask="url(#cross-outline-mask)"/>
+</svg>

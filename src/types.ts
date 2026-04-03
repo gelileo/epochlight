@@ -33,7 +33,18 @@ export interface Entry {
   superseded_by: ConnectionRef | null;
   references: { title: string; url: string }[];
   media?: MediaItem[];
+  category?: HistoryCategory;
 }
+
+export type HistoryCategory =
+  | 'war'
+  | 'empire'
+  | 'politics'
+  | 'religion'
+  | 'exploration'
+  | 'trade'
+  | 'culture'
+  | 'revolution';
 
 export type Subject =
   | 'mathematics'

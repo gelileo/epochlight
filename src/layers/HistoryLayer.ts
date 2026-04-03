@@ -1,7 +1,8 @@
-import { ScatterplotLayer } from '@deck.gl/layers';
+import { IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import type { Layer } from '@deck.gl/core';
 import type { Entry, Era } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
+import { getHistoryIconAtlas } from '../utils/historyIconAtlas';
 
 export interface HistoryLayerProps {
   entries: Entry[];
@@ -15,15 +16,11 @@ export interface HistoryLayerProps {
   pulseTime?: number;
 }
 
-// Flame palette — visually distinct from science entry colors (blue/green/purple)
-const FLAME_OUTER: [number, number, number] = [224, 80, 32];   // deep red-orange ring
-const FLAME_INNER: [number, number, number] = [255, 180, 60];  // bright amber fill
+// Flame palette for glow/pulse effects and icon tinting
+const FLAME_OUTER: [number, number, number] = [224, 80, 32];
+const FLAME_INNER: [number, number, number] = [255, 180, 60];
 
-const TIER_RADIUS: Record<1 | 2 | 3, number> = {
-  1: 14,
-  2: 10,
-  3: 7,
-};
+const ICON_SIZE = 36;
 
 function getZoomOpacity(zoom: number): number {
   return Math.max(0, Math.min(1, (6 - zoom) / 2));
@@ -57,72 +54,29 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
 
   if (historyEntries.length === 0) return [];
 
+  const { atlasUrl, mapping } = getHistoryIconAtlas();
   const layers: Layer[] = [];
 
-  // --- Outer glow (soft flame halo) ---
+  // --- Category icons ---
   layers.push(
-    new ScatterplotLayer<Entry>({
-      id: 'history-glow',
+    new IconLayer<Entry>({
+      id: 'history-icons',
       data: historyEntries,
+      iconAtlas: atlasUrl,
+      iconMapping: mapping,
+      getIcon: (d) => d.category ?? 'culture',
       getPosition: (d) => [d.lng, d.lat],
-      getRadius: (d) => {
-        const base = TIER_RADIUS[d.tier];
-        return (d.id === selectedEntryId ? base * 1.4 : base) * 2.2;
+      getSize: (d) => {
+        const base = ICON_SIZE;
+        return d.id === selectedEntryId ? base * 1.3 : base;
       },
-      getFillColor: (d) => {
+      getColor: (d) => {
         const isSelected = d.id === selectedEntryId;
         const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
-        return [...FLAME_INNER, Math.round(opacity * 0.15 * zoomOpacity * 255)] as [number, number, number, number];
+        // White = no tint, colors are baked into the atlas per category
+        return [255, 255, 255, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
       },
-      radiusUnits: 'pixels' as const,
-      pickable: false,
-      updateTriggers: {
-        getRadius: [selectedEntryId],
-        getFillColor: [currentYear, selectedEntryId, zoom],
-      },
-    })
-  );
-
-  // --- Outer ring (deep red-orange border) ---
-  layers.push(
-    new ScatterplotLayer<Entry>({
-      id: 'history-ring',
-      data: historyEntries,
-      getPosition: (d) => [d.lng, d.lat],
-      getRadius: (d) => {
-        const base = TIER_RADIUS[d.tier];
-        return d.id === selectedEntryId ? base * 1.4 : base;
-      },
-      getFillColor: (d) => {
-        const isSelected = d.id === selectedEntryId;
-        const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
-        return [...FLAME_OUTER, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
-      },
-      radiusUnits: 'pixels' as const,
-      pickable: false,
-      updateTriggers: {
-        getRadius: [selectedEntryId],
-        getFillColor: [currentYear, selectedEntryId, zoom],
-      },
-    })
-  );
-
-  // --- Inner fill (bright amber core, slightly smaller than ring) ---
-  layers.push(
-    new ScatterplotLayer<Entry>({
-      id: 'history-core',
-      data: historyEntries,
-      getPosition: (d) => [d.lng, d.lat],
-      getRadius: (d) => {
-        const base = TIER_RADIUS[d.tier] - 2.5;
-        return d.id === selectedEntryId ? base * 1.4 : base;
-      },
-      getFillColor: (d) => {
-        const isSelected = d.id === selectedEntryId;
-        const opacity = isSelected ? 1.0 : getEntryOpacity(d.year, currentYear, windowWidth);
-        return [...FLAME_INNER, Math.round(opacity * zoomOpacity * 255)] as [number, number, number, number];
-      },
-      radiusUnits: 'pixels' as const,
+      sizeUnits: 'pixels' as const,
       pickable: true,
       onClick: (info) => {
         if (info.object) onEntryClick(info.object.id);
@@ -131,8 +85,9 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
         onEntryHover(info.object ?? null);
       },
       updateTriggers: {
-        getRadius: [selectedEntryId],
-        getFillColor: [currentYear, selectedEntryId, zoom],
+        getIcon: [entries],
+        getSize: [selectedEntryId],
+        getColor: [currentYear, selectedEntryId, zoom],
       },
     })
   );
@@ -150,8 +105,8 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
         data: selectedArr,
         getPosition: (d) => [d.lng, d.lat],
         getRadius: (d) => {
-          const base = TIER_RADIUS[d.tier] * 1.4;
-          return base * (1.8 + pulsePhase * 1.2);
+          const base = ICON_SIZE * 1.3;
+          return base * (1.0 + pulsePhase * 0.8);
         },
         getFillColor: [0, 0, 0, 0],
         stroked: true,
