@@ -2,7 +2,7 @@ import { createContext, useCallback, useState, type ReactNode } from 'react';
 import type { Tier, TierContextValue } from './useTier';
 
 const FEATURE_TIERS: Record<string, Tier> = {
-  'scrubber-zoom': 'scholar',
+  'scrubber-zoom': 'free',
   'knowledge-flow': 'scholar',
   'translated-content': 'scholar',
   'hero-images': 'scholar',
