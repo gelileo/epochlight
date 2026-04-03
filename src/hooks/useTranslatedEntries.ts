@@ -38,7 +38,7 @@ export function useTranslatedEntries(entries: Entry[], locale: Locale): Entry[] 
     let cancelled = false;
     setLoading(true);
 
-    fetch(`/data/translations/${locale}.json`)
+    fetch(`${import.meta.env.BASE_URL}data/translations/${locale}.json`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
