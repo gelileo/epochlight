@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Entry, Subject } from '../types';
 import { SUBJECT_COLORS } from '../types';
 import { useLocale } from '../hooks/useLocale';
+import { formatYear } from '../utils/formatUtils';
 import './SidePanel.css';
 
 export interface SidePanelProps {
@@ -20,13 +21,6 @@ const MEDIA_HINT_ICONS: Record<string, string> = {
 };
 
 const DEFAULT_ICON = '\u{1F4A1}';
-
-function formatYear(year: number): string {
-  if (year < 0) {
-    return `${Math.abs(year)} BCE`;
-  }
-  return `${year} CE`;
-}
 
 function formatSubject(subject: string): string {
   return subject

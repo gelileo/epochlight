@@ -170,6 +170,73 @@ export default function App() {
     }).length;
   }, [data, appState.state.currentYear, appState.state.showContextLayer, effectiveWindowWidth]);
 
+  // Layer creation must be before early returns to satisfy React's Rules of Hooks.
+  // When data is not yet loaded, these return empty arrays.
+  const eras = data?.meta.eras ?? [];
+  const rawEntries = data?.entries ?? [];
+
+  const entryLayers = useMemo(() => {
+    if (!data) return [];
+    return createEntryLayers({
+      entries: translatedEntries,
+      currentYear: appState.state.currentYear,
+      eras,
+      enabledSubjects: appState.state.enabledSubjects,
+      selectedEntryId: appState.state.selectedEntryId,
+      onEntryClick: handleEntryClick,
+      onEntryHover: handleEntryHover,
+      zoom,
+      pulseTime,
+      windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
+    });
+  }, [data, translatedEntries, appState.state.currentYear, eras, appState.state.enabledSubjects, appState.state.selectedEntryId, handleEntryClick, handleEntryHover, zoom, pulseTime, scrubberZoomed, effectiveWindowWidth]);
+
+  const entryCardLayers = useMemo(() => {
+    if (!data) return [];
+    return createEntryCardLayers({
+      entries: translatedEntries,
+      currentYear: appState.state.currentYear,
+      eras,
+      enabledSubjects: appState.state.enabledSubjects,
+      selectedEntryId: appState.state.selectedEntryId,
+      onEntryClick: handleEntryClick,
+      onEntryHover: handleEntryHover,
+      zoom,
+      windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
+      preciseMode: scrubberZoomed,
+    });
+  }, [data, translatedEntries, appState.state.currentYear, eras, appState.state.enabledSubjects, appState.state.selectedEntryId, handleEntryClick, handleEntryHover, zoom, scrubberZoomed, effectiveWindowWidth]);
+
+  const connectionLayers = useMemo(() => {
+    if (!data) return [];
+    return createConnectionLayers({
+      entries: rawEntries,
+      selectedEntryId: appState.state.selectedEntryId,
+      currentYear: appState.state.currentYear,
+      eras,
+      showKnowledgeFlow: appState.state.showKnowledgeFlow,
+      onEntryClick: handleGhostNodeClick,
+      windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
+    });
+  }, [data, rawEntries, appState.state.selectedEntryId, appState.state.currentYear, eras, appState.state.showKnowledgeFlow, handleGhostNodeClick, scrubberZoomed, effectiveWindowWidth]);
+
+  const historyLayers = useMemo(() => {
+    if (!data) return [];
+    return createHistoryLayers({
+      entries: translatedEntries,
+      currentYear: appState.state.currentYear,
+      eras,
+      showContextLayer: appState.state.showContextLayer,
+      selectedEntryId: appState.state.selectedEntryId,
+      onEntryClick: handleEntryClick,
+      onEntryHover: handleEntryHover,
+      zoom,
+      windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
+    });
+  }, [data, translatedEntries, appState.state.currentYear, eras, appState.state.showContextLayer, appState.state.selectedEntryId, handleEntryClick, handleEntryHover, zoom, scrubberZoomed, effectiveWindowWidth]);
+
+  const allLayers = useMemo(() => [...connectionLayers, ...historyLayers, ...entryLayers, ...entryCardLayers], [connectionLayers, historyLayers, entryLayers, entryCardLayers]);
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -181,56 +248,6 @@ export default function App() {
   if (!data) {
     return <ErrorScreen onRetry={refetch} />;
   }
-
-  const entryLayers = createEntryLayers({
-    entries: translatedEntries,
-    currentYear: appState.state.currentYear,
-    eras: data.meta.eras,
-    enabledSubjects: appState.state.enabledSubjects,
-    selectedEntryId: appState.state.selectedEntryId,
-    onEntryClick: handleEntryClick,
-    onEntryHover: handleEntryHover,
-    zoom,
-    pulseTime,
-    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
-  });
-
-  const entryCardLayers = createEntryCardLayers({
-    entries: translatedEntries,
-    currentYear: appState.state.currentYear,
-    eras: data.meta.eras,
-    enabledSubjects: appState.state.enabledSubjects,
-    selectedEntryId: appState.state.selectedEntryId,
-    onEntryClick: handleEntryClick,
-    onEntryHover: handleEntryHover,
-    zoom,
-    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
-    preciseMode: scrubberZoomed,
-  });
-
-  const connectionLayers = createConnectionLayers({
-    entries: data.entries,
-    selectedEntryId: appState.state.selectedEntryId,
-    currentYear: appState.state.currentYear,
-    eras: data.meta.eras,
-    showKnowledgeFlow: appState.state.showKnowledgeFlow,
-    onEntryClick: handleGhostNodeClick,
-    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
-  });
-
-  const historyLayers = createHistoryLayers({
-    entries: translatedEntries,
-    currentYear: appState.state.currentYear,
-    eras: data.meta.eras,
-    showContextLayer: appState.state.showContextLayer,
-    selectedEntryId: appState.state.selectedEntryId,
-    onEntryClick: handleEntryClick,
-    onEntryHover: handleEntryHover,
-    zoom,
-    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
-  });
-
-  const allLayers = [...connectionLayers, ...historyLayers, ...entryLayers, ...entryCardLayers];
 
   const selectedEntry = appState.state.selectedEntryId
     ? translatedEntries.find((e) => e.id === appState.state.selectedEntryId) ?? null

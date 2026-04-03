@@ -49,11 +49,23 @@ export function getEraSegments(
   const counts = countEntriesPerEra(eras, entries);
   const totalEntries = entries.length || 1;
 
-  // First pass: compute raw proportional widths, enforce minimum
+  // First pass: compute raw proportional widths
   const rawWidths = eras.map((era) => {
     const count = counts.get(era.id) ?? 0;
     return (count / totalEntries) * totalWidth;
   });
+
+  // If all eras at minimum width would exceed totalWidth, distribute equally
+  if (eras.length * MIN_ERA_WIDTH > totalWidth) {
+    const equalWidth = totalWidth / eras.length;
+    const segments: EraSegment[] = [];
+    let x = 0;
+    for (let i = 0; i < eras.length; i++) {
+      segments.push({ era: eras[i], startPx: x, endPx: x + equalWidth });
+      x += equalWidth;
+    }
+    return segments;
+  }
 
   // Count how many eras need the minimum and how much space that consumes
   const minCount = rawWidths.filter((w) => w < MIN_ERA_WIDTH).length;

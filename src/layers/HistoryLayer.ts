@@ -3,6 +3,7 @@ import type { Layer } from '@deck.gl/core';
 import type { Entry, Era } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
 import { getHistoryIconAtlas } from '../utils/historyIconAtlas';
+import { getDotOpacityAtZoom } from '../utils/colorUtils';
 
 export interface HistoryLayerProps {
   entries: Entry[];
@@ -23,9 +24,6 @@ const FLAME_INNER: [number, number, number] = [255, 180, 60];
 
 const ICON_SIZE = 36;
 
-function getZoomOpacity(zoom: number): number {
-  return Math.max(0, Math.min(1, (6 - zoom) / 2));
-}
 
 export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
   const {
@@ -43,7 +41,7 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
 
   if (!showContextLayer) return [];
 
-  const zoomOpacity = getZoomOpacity(zoom);
+  const zoomOpacity = getDotOpacityAtZoom(zoom);
   if (zoomOpacity <= 0) return [];
 
   const windowWidth = windowWidthOverride ?? getWindowWidth(currentYear, eras);

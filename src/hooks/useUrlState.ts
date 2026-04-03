@@ -1,17 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { Subject } from '../types';
 import type { AppState, AppStateActions, AppStateInit } from './useAppState';
-
-const ALL_SUBJECTS: Subject[] = [
-  'mathematics',
-  'physics',
-  'chemistry',
-  'medicine-biology',
-  'inventions-engineering',
-  'astronomy-cosmology',
-  'philosophy-logic',
-  'world-history',
-];
+import { FILTERABLE_SUBJECTS, ALL_SUBJECTS } from '../constants/subjects';
 
 const VALID_SUBJECTS = new Set<string>(ALL_SUBJECTS);
 
@@ -52,7 +42,7 @@ export function parseHash(hash: string): AppStateInit {
     } else if (segments[i] === 'subjects' && i + 1 < segments.length) {
       const subjectStr = segments[i + 1];
       if (subjectStr === 'all') {
-        result.enabledSubjects = [...ALL_SUBJECTS];
+        result.enabledSubjects = [...FILTERABLE_SUBJECTS];
       } else if (subjectStr === 'none') {
         result.enabledSubjects = [];
       } else {
@@ -79,8 +69,8 @@ function buildHash(state: AppState): string {
     parts.push('/context/off');
   }
 
-  const enabledArr = ALL_SUBJECTS.filter((s) => state.enabledSubjects.has(s));
-  if (enabledArr.length === ALL_SUBJECTS.length) {
+  const enabledArr = FILTERABLE_SUBJECTS.filter((s) => state.enabledSubjects.has(s));
+  if (enabledArr.length === FILTERABLE_SUBJECTS.length) {
     // All subjects enabled — omit from URL for cleanliness
   } else if (enabledArr.length === 0) {
     parts.push('/subjects/none');
@@ -134,5 +124,5 @@ export function useUrlState(state: AppState, actions: AppStateActions): void {
     return () => {
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [actions]);
+  }, [actions.setYear, actions.selectEntry]);
 }

@@ -5,35 +5,11 @@ import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
 import { searchEntries } from '../utils/search';
 import { trackEvent } from '../utils/analytics';
 import { useLocale, LOCALE_LABELS, type Locale } from '../hooks/useLocale';
+import { FILTERABLE_SUBJECTS, SUBJECT_LOCALE_KEYS } from '../constants/subjects';
+import { formatYear } from '../utils/formatUtils';
 import './ControlPanel.css';
 
-const ALL_SUBJECTS: Subject[] = [
-  'mathematics',
-  'physics',
-  'chemistry',
-  'medicine-biology',
-  'inventions-engineering',
-  'astronomy-cosmology',
-  'philosophy-logic',
-];
-
-const SUBJECT_LOCALE_KEYS: Record<string, string> = {
-  mathematics: 'subjects.mathematics',
-  physics: 'subjects.physics',
-  chemistry: 'subjects.chemistry',
-  'medicine-biology': 'subjects.medicineBiology',
-  'inventions-engineering': 'subjects.inventionsEngineering',
-  'astronomy-cosmology': 'subjects.astronomyCosmology',
-  'philosophy-logic': 'subjects.philosophyLogic',
-  'world-history': 'subjects.worldHistory',
-};
-
 const LOCALES = Object.keys(LOCALE_LABELS) as Locale[];
-
-function formatYear(year: number): string {
-  if (year < 0) return `${Math.abs(year)} BCE`;
-  return `${year} CE`;
-}
 
 interface ControlPanelProps {
   // Subject filters
@@ -82,7 +58,7 @@ export default function ControlPanel({
 
   const visibleCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const subject of ALL_SUBJECTS) counts[subject] = 0;
+    for (const subject of FILTERABLE_SUBJECTS) counts[subject] = 0;
     for (const entry of entries) {
       const opacity = getEntryOpacity(entry.year, currentYear, windowWidth);
       if (opacity > 0) counts[entry.subject] = (counts[entry.subject] || 0) + 1;
@@ -232,9 +208,9 @@ export default function ControlPanel({
       {/* --- Expanded body --- */}
       <div className="cp__body">
         {/* Subjects */}
-        <div className="cp__section-label">{t('subjects.header')} {enabledCount}/{ALL_SUBJECTS.length}</div>
+        <div className="cp__section-label">{t('subjects.header')} {enabledCount}/{FILTERABLE_SUBJECTS.length}</div>
         <ul className="cp__subject-list">
-          {ALL_SUBJECTS.map((subject) => {
+          {FILTERABLE_SUBJECTS.map((subject) => {
             const enabled = enabledSubjects.has(subject);
             return (
               <li

@@ -2,6 +2,7 @@ import { ScatterplotLayer } from '@deck.gl/layers';
 import type { Entry, Era, Subject } from '../types';
 import { SUBJECT_COLORS } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
+import { hexToRgb, getDotOpacityAtZoom, isEntryVisible } from '../utils/colorUtils';
 
 interface EntryLayerProps {
   entries: Entry[];
@@ -16,33 +17,11 @@ interface EntryLayerProps {
   windowWidthOverride?: number;
 }
 
-/**
- * Dot opacity crossfade: full at zoom <= 4, fading out from 4 to 6, hidden at zoom >= 6.
- * Formula: dotOpacityMultiplier = clamp((6 - zoom) / 2, 0, 1)
- */
-function getDotOpacityMultiplier(zoom: number): number {
-  return Math.max(0, Math.min(1, (6 - zoom) / 2));
-}
-
 const TIER_RADIUS: Record<1 | 2 | 3, number> = {
   1: 12,
   2: 8,
   3: 5,
 };
-
-function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace('#', '');
-  return [
-    parseInt(h.substring(0, 2), 16),
-    parseInt(h.substring(2, 4), 16),
-    parseInt(h.substring(4, 6), 16),
-  ];
-}
-
-function isEntryVisible(entry: Entry, enabledSubjects: Set<Subject>): boolean {
-  if (enabledSubjects.has(entry.subject)) return true;
-  return entry.secondary_subjects.some((s) => enabledSubjects.has(s));
-}
 
 export function createEntryLayers(props: EntryLayerProps): ScatterplotLayer[] {
   const {
@@ -58,7 +37,7 @@ export function createEntryLayers(props: EntryLayerProps): ScatterplotLayer[] {
     windowWidthOverride,
   } = props;
 
-  const dotOpacityMultiplier = getDotOpacityMultiplier(zoom);
+  const dotOpacityMultiplier = getDotOpacityAtZoom(zoom);
 
   // Don't create layers if fully transparent
   if (dotOpacityMultiplier <= 0) return [];

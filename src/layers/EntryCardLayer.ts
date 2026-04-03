@@ -2,6 +2,7 @@ import { TextLayer } from '@deck.gl/layers';
 import type { Layer } from '@deck.gl/core';
 import type { Entry, Era, Subject } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
+import { getCardOpacityAtZoom, isEntryVisible } from '../utils/colorUtils';
 
 interface EntryCardLayerProps {
   entries: Entry[];
@@ -27,24 +28,11 @@ const MEDIA_HINT_ICONS: Record<string, string> = {
 
 const DEFAULT_ICON = '\u{1F4A1}';
 
-function isEntryVisible(entry: Entry, enabledSubjects: Set<Subject>): boolean {
-  if (enabledSubjects.has(entry.subject)) return true;
-  return entry.secondary_subjects.some((s) => enabledSubjects.has(s));
-}
-
 function getMediaIcon(mediaHint: Entry['media_hint']): string {
   if (mediaHint && MEDIA_HINT_ICONS[mediaHint]) {
     return MEDIA_HINT_ICONS[mediaHint];
   }
   return DEFAULT_ICON;
-}
-
-/**
- * Card opacity crossfade: invisible at zoom <= 4, fading in from 4 to 6, full at zoom >= 6.
- * Formula: cardOpacityMultiplier = clamp((zoom - 4) / 2, 0, 1)
- */
-function getCardOpacityMultiplier(zoom: number): number {
-  return Math.max(0, Math.min(1, (zoom - 4) / 2));
 }
 
 export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
@@ -62,7 +50,7 @@ export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
   } = props;
 
   // In precise mode, always show labels regardless of map zoom
-  const cardOpacity = preciseMode ? 1 : getCardOpacityMultiplier(zoom);
+  const cardOpacity = preciseMode ? 1 : getCardOpacityAtZoom(zoom);
 
   // Don't create layers if fully transparent
   if (cardOpacity <= 0) return [];

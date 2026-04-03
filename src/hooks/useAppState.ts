@@ -1,16 +1,7 @@
 import { useCallback, useState } from 'react';
 import type { Subject } from '../types';
 import { trackEvent } from '../utils/analytics';
-
-const ALL_SUBJECTS: Subject[] = [
-  'mathematics',
-  'physics',
-  'chemistry',
-  'medicine-biology',
-  'inventions-engineering',
-  'astronomy-cosmology',
-  'philosophy-logic',
-];
+import { FILTERABLE_SUBJECTS } from '../constants/subjects';
 
 export interface AppState {
   currentYear: number;
@@ -47,7 +38,7 @@ export function useAppState(init?: AppStateInit): AppStateResult {
     selectedEntryId: init?.selectedEntryId ?? null,
     enabledSubjects: init?.enabledSubjects
       ? new Set(init.enabledSubjects)
-      : new Set(ALL_SUBJECTS),
+      : new Set(FILTERABLE_SUBJECTS),
     showKnowledgeFlow: false,
     showContextLayer: init?.showContextLayer ?? true,
   }));
@@ -73,7 +64,7 @@ export function useAppState(init?: AppStateInit): AppStateResult {
   }, []);
 
   const enableAllSubjects = useCallback(() => {
-    setState((prev) => ({ ...prev, enabledSubjects: new Set(ALL_SUBJECTS) }));
+    setState((prev) => ({ ...prev, enabledSubjects: new Set(FILTERABLE_SUBJECTS) }));
   }, []);
 
   const disableAllSubjects = useCallback(() => {

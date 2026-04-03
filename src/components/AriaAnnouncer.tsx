@@ -1,22 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Era, Entry } from '../types';
+import { formatYear } from '../utils/formatUtils';
+import { getEraForYear } from '../utils/timeWindow';
 
 interface AriaAnnouncerProps {
   currentYear: number;
   eras: Era[];
   selectedEntry: Entry | null;
-}
-
-function formatYear(year: number): string {
-  if (year < 0) return `${Math.abs(Math.round(year))} BCE`;
-  return `${Math.round(year)} CE`;
-}
-
-function getEraForYear(year: number, eras: Era[]): Era | null {
-  for (const era of eras) {
-    if (year >= era.start && year <= era.end) return era;
-  }
-  return null;
 }
 
 function formatSubject(subject: string): string {

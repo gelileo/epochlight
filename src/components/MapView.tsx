@@ -7,6 +7,7 @@ import type { Entry, Era } from '../types';
 import type { MapLabelLevel } from '../styles/era-themes';
 import { getEraForYear } from '../utils/timeWindow';
 import EraOverlay from './EraOverlay';
+import { formatYear } from '../utils/formatUtils';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string;
@@ -104,14 +105,16 @@ export default function MapView({
     }
   }, [mapLabels, mapLoaded, mapStyle]);
 
+  const styleTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const handleStyleData = useCallback(() => {
     // Re-apply labels after every style load (style switch triggers this)
     if (mapRef.current) {
       const map = mapRef.current.getMap();
-      // Defer to next tick so all layers are present
-      setTimeout(() => applyLabelLevel(map, mapLabels), 50);
+      if (styleTimerRef.current) clearTimeout(styleTimerRef.current);
+      styleTimerRef.current = setTimeout(() => applyLabelLevel(map, mapLabels), 50);
     }
   }, [mapLabels]);
+  useEffect(() => () => { if (styleTimerRef.current) clearTimeout(styleTimerRef.current); }, []);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -134,11 +137,6 @@ export default function MapView({
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     setPointerPos({ x: e.clientX, y: e.clientY });
   }, []);
-
-  const formatYear = (year: number) => {
-    if (year < 0) return `${Math.abs(year)} BCE`;
-    return `${year} CE`;
-  };
 
   return (
     <div

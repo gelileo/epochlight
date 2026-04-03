@@ -3,6 +3,7 @@ import type { Layer } from '@deck.gl/core';
 import type { Entry, Era } from '../types';
 import { SUBJECT_COLORS } from '../types';
 import { getEntryOpacity, getWindowWidth } from '../utils/timeWindow';
+import { hexToRgb } from '../utils/colorUtils';
 
 interface ConnectionLayerProps {
   entries: Entry[];
@@ -12,15 +13,6 @@ interface ConnectionLayerProps {
   showKnowledgeFlow: boolean;
   onEntryClick: (entryId: string) => void;
   windowWidthOverride?: number;
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace('#', '');
-  return [
-    parseInt(h.substring(0, 2), 16),
-    parseInt(h.substring(2, 4), 16),
-    parseInt(h.substring(4, 6), 16),
-  ];
 }
 
 interface ArcDatum {

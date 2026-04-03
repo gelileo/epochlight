@@ -12,6 +12,7 @@ import type { ScrubberZoom } from '../utils/scrubberScale';
 import { useLocale } from '../hooks/useLocale';
 import { useFeature } from '../hooks/useTier';
 import { SUBJECT_COLORS } from '../types';
+import { formatYear } from '../utils/formatUtils';
 
 interface ScrubberBarProps {
   currentYear: number;
@@ -38,11 +39,6 @@ const ERA_SEGMENT_TINTS: Record<string, string> = {
   'industrial': 'rgba(60, 100, 150, 0.30)',
   'clean': 'rgba(45, 110, 170, 0.30)',
 };
-
-function formatYear(year: number): string {
-  if (year < 0) return `${Math.abs(Math.round(year))} BCE`;
-  return `${Math.round(year)} CE`;
-}
 
 function getYearStep(eras: Era[], currentYear: number): number {
   for (const era of eras) {
