@@ -419,22 +419,24 @@ def main():
                 size_kb = out_path.stat().st_size / 1024
                 print(f"  Translation: {lang_dir.name}.json ({len(merged)} entries, {size_kb:.1f} KB)")
     else:
-        # Remote: fetch translation files from GitHub
-        translations_base = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/translations"
+        # Remote: fetch translation files from GitHub API (supports private repos)
         any_found = False
+        token = os.environ.get("GITHUB_TOKEN")
         for lang in TRANSLATION_LANGS:
             merged: dict = {}
             for subj in TRANSLATION_SUBJECTS:
-                url = f"{translations_base}/{lang}/{subj}.json"
+                # Use GitHub API to get raw file content from private repos
+                api_url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/translations/{lang}/{subj}.json?ref={GITHUB_BRANCH}"
                 try:
-                    req = urllib.request.Request(url)
-                    token = os.environ.get("GITHUB_TOKEN")
+                    req = urllib.request.Request(api_url)
+                    req.add_header("Accept", "application/vnd.github.v3.raw")
                     if token:
                         req.add_header("Authorization", f"token {token}")
                     with urllib.request.urlopen(req, timeout=30) as resp:
                         data = json.loads(resp.read())
                         merged.update(data)
-                except (urllib.error.URLError, json.JSONDecodeError):
+                except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError) as e:
+                    print(f"    WARN: Could not fetch translations/{lang}/{subj}.json: {e}")
                     pass  # subject file may not exist for this language
             if merged:
                 translations_dst.mkdir(parents=True, exist_ok=True)
