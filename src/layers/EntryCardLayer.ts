@@ -12,6 +12,8 @@ interface EntryCardLayerProps {
   onEntryClick: (entryId: string) => void;
   onEntryHover: (entry: Entry | null) => void;
   zoom: number;
+  windowWidthOverride?: number;
+  preciseMode?: boolean;
 }
 
 const MEDIA_HINT_ICONS: Record<string, string> = {
@@ -55,17 +57,22 @@ export function createEntryCardLayers(props: EntryCardLayerProps): Layer[] {
     onEntryClick,
     onEntryHover,
     zoom,
+    windowWidthOverride,
+    preciseMode = false,
   } = props;
 
-  const cardOpacity = getCardOpacityMultiplier(zoom);
+  // In precise mode, always show labels regardless of map zoom
+  const cardOpacity = preciseMode ? 1 : getCardOpacityMultiplier(zoom);
 
   // Don't create layers if fully transparent
   if (cardOpacity <= 0) return [];
 
-  const windowWidth = getWindowWidth(currentYear, eras);
+  const windowWidth = windowWidthOverride ?? getWindowWidth(currentYear, eras);
 
   const visibleEntries = entries.filter((entry) => {
-    if (!isEntryVisible(entry, enabledSubjects)) return false;
+    // In precise mode, show all entry types including world-history
+    if (!preciseMode && !isEntryVisible(entry, enabledSubjects)) return false;
+    if (!preciseMode && entry.subject === 'world-history') return false;
     const isSelected = entry.id === selectedEntryId;
     if (isSelected) return true;
     const opacity = getEntryOpacity(entry.year, currentYear, windowWidth);

@@ -4,9 +4,17 @@ export interface EraSegment {
   era: Era;
   startPx: number;
   endPx: number;
+  /** true if this segment is an adjacent-era overlap region (grayed out) */
+  isOverlap?: boolean;
 }
 
+export type ScrubberZoom =
+  | { mode: 'overview' }
+  | { mode: 'era'; eraId: string };
+
 const MIN_ERA_WIDTH = 80;
+/** Fraction of adjacent eras shown at edges when zoomed */
+const OVERLAP_FRACTION = 0.10;
 
 /**
  * Count entries that fall within each era's year range.
@@ -142,4 +150,137 @@ export function pixelToYear(
   }
 
   return eras[eras.length - 1].end;
+}
+
+// ---------------------------------------------------------------------------
+// Zoomed-era scale functions
+// ---------------------------------------------------------------------------
+
+/**
+ * When zoomed into a single era, return segments for that era (filling most of
+ * the bar) plus ±10% overlap of adjacent eras at the edges.
+ */
+export function getZoomedEraSegments(
+  eras: Era[],
+  totalWidth: number,
+  zoomedEraId: string,
+): EraSegment[] {
+  const eraIdx = eras.findIndex((e) => e.id === zoomedEraId);
+  if (eraIdx === -1) return [];
+
+  const era = eras[eraIdx];
+  const prevEra = eraIdx > 0 ? eras[eraIdx - 1] : null;
+  const nextEra = eraIdx < eras.length - 1 ? eras[eraIdx + 1] : null;
+
+  const overlapPx = totalWidth * OVERLAP_FRACTION;
+  const leftOverlapPx = prevEra ? overlapPx : 0;
+  const rightOverlapPx = nextEra ? overlapPx : 0;
+
+  const segments: EraSegment[] = [];
+
+  // Left overlap (previous era's tail)
+  if (prevEra) {
+    segments.push({
+      era: prevEra,
+      startPx: 0,
+      endPx: leftOverlapPx,
+      isOverlap: true,
+    });
+  }
+
+  // Main zoomed era
+  segments.push({
+    era,
+    startPx: leftOverlapPx,
+    endPx: totalWidth - rightOverlapPx,
+  });
+
+  // Right overlap (next era's head)
+  if (nextEra) {
+    segments.push({
+      era: nextEra,
+      startPx: totalWidth - rightOverlapPx,
+      endPx: totalWidth,
+      isOverlap: true,
+    });
+  }
+
+  return segments;
+}
+
+/**
+ * Year → pixel in zoomed mode.
+ * The overlap regions only show a fraction of the adjacent era's year range.
+ */
+export function zoomedYearToPixel(
+  year: number,
+  eras: Era[],
+  totalWidth: number,
+  zoomedEraId: string,
+): number {
+  const segments = getZoomedEraSegments(eras, totalWidth, zoomedEraId);
+  if (segments.length === 0) return 0;
+
+  for (const seg of segments) {
+    const { yearStart, yearEnd } = getSegmentYearRange(seg);
+    if (year >= yearStart && year <= yearEnd) {
+      const t = yearEnd === yearStart ? 0 : (year - yearStart) / (yearEnd - yearStart);
+      return seg.startPx + t * (seg.endPx - seg.startPx);
+    }
+  }
+
+  // Clamp to edges
+  const firstSeg = segments[0];
+  const lastSeg = segments[segments.length - 1];
+  const { yearStart: firstYear } = getSegmentYearRange(firstSeg);
+  const { yearEnd: lastYear } = getSegmentYearRange(lastSeg);
+  if (year < firstYear) return firstSeg.startPx;
+  return lastSeg.endPx;
+}
+
+/**
+ * Pixel → year in zoomed mode.
+ */
+export function zoomedPixelToYear(
+  pixel: number,
+  eras: Era[],
+  totalWidth: number,
+  zoomedEraId: string,
+): number {
+  const segments = getZoomedEraSegments(eras, totalWidth, zoomedEraId);
+  if (segments.length === 0) return 0;
+
+  for (const seg of segments) {
+    if (pixel >= seg.startPx && pixel <= seg.endPx) {
+      const pxSpan = seg.endPx - seg.startPx;
+      const t = pxSpan === 0 ? 0 : (pixel - seg.startPx) / pxSpan;
+      const { yearStart, yearEnd } = getSegmentYearRange(seg);
+      return yearStart + t * (yearEnd - yearStart);
+    }
+  }
+
+  const lastSeg = segments[segments.length - 1];
+  const { yearEnd } = getSegmentYearRange(lastSeg);
+  return yearEnd;
+}
+
+/**
+ * For overlap segments, only show the tail/head fraction of the era.
+ * For the main segment, show the full era range.
+ */
+function getSegmentYearRange(seg: EraSegment): { yearStart: number; yearEnd: number } {
+  const eraSpan = seg.era.end - seg.era.start;
+  if (!seg.isOverlap) {
+    return { yearStart: seg.era.start, yearEnd: seg.era.end };
+  }
+  // Overlap: if this segment is before the main era, show the tail
+  // If after, show the head. We detect by checking if startPx is 0.
+  if (seg.startPx === 0) {
+    // Left overlap — show tail of previous era
+    const overlapYears = eraSpan * OVERLAP_FRACTION * 3;
+    return { yearStart: seg.era.end - overlapYears, yearEnd: seg.era.end };
+  }
+  // Right overlap — show head of next era
+  const overlapYears = eraSpan * OVERLAP_FRACTION * 3;
+  return { yearStart: seg.era.start, yearEnd: seg.era.start + overlapYears };
 }

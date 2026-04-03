@@ -13,6 +13,7 @@ interface EntryLayerProps {
   onEntryHover: (entry: Entry | null) => void;
   zoom?: number;
   pulseTime?: number;
+  windowWidthOverride?: number;
 }
 
 /**
@@ -54,6 +55,7 @@ export function createEntryLayers(props: EntryLayerProps): ScatterplotLayer[] {
     onEntryHover,
     zoom = 2,
     pulseTime = 0,
+    windowWidthOverride,
   } = props;
 
   const dotOpacityMultiplier = getDotOpacityMultiplier(zoom);
@@ -61,7 +63,7 @@ export function createEntryLayers(props: EntryLayerProps): ScatterplotLayer[] {
   // Don't create layers if fully transparent
   if (dotOpacityMultiplier <= 0) return [];
 
-  const windowWidth = getWindowWidth(currentYear, eras);
+  const windowWidth = windowWidthOverride ?? getWindowWidth(currentYear, eras);
 
   const visibleEntries = entries.filter((entry) => {
     if (!isEntryVisible(entry, enabledSubjects)) return false;

@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 export type Tier = 'free' | 'scholar';
 
 const FEATURE_TIERS: Record<string, Tier> = {
-  'scrubber-zoom': 'scholar',
+  'scrubber-zoom': 'free',
   'knowledge-flow': 'scholar',
   'translated-content': 'scholar',
   'hero-images': 'scholar',

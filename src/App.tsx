@@ -32,6 +32,7 @@ export default function App() {
   const appState = useAppState(initialUrlState);
   const [hoveredEntry, setHoveredEntry] = useState<Entry | null>(null);
   const [zoom, setZoom] = useState(2);
+  const [scrubberZoomed, setScrubberZoomed] = useState(false);
   const [pulseTime, setPulseTime] = useState(0);
   const rafRef = useRef<number>(0);
   const [isScrubbing, setIsScrubbing] = useState(false);
@@ -138,13 +139,20 @@ export default function App() {
   // Apply content translations (lazy-loaded for non-English locales)
   const translatedEntries = useTranslatedEntries(data?.entries ?? [], locale);
 
+  // When scrubber is zoomed into an era, show only entries at/near the exact cursor year
+  const effectiveWindowWidth = useMemo(() => {
+    if (!data) return 100;
+    if (!scrubberZoomed) return getWindowWidth(appState.state.currentYear, data.meta.eras);
+    // Tight window: ±1 year full opacity, ±2 years fade, beyond = hidden
+    return 1;
+  }, [data, appState.state.currentYear, scrubberZoomed]);
+
   // Compute empty state flags (must be before early returns so hooks aren't conditional)
   const allSubjectsDisabled = appState.state.enabledSubjects.size === 0;
   const noEntriesInWindow = useMemo(() => {
     if (!data || allSubjectsDisabled) return false;
-    const w = getWindowWidth(appState.state.currentYear, data.meta.eras);
     return !data.entries.some((entry) => {
-      const opacity = getEntryOpacity(entry.year, appState.state.currentYear, w);
+      const opacity = getEntryOpacity(entry.year, appState.state.currentYear, effectiveWindowWidth);
       if (opacity <= 0) return false;
       const subjects = appState.state.enabledSubjects;
       return (
@@ -152,16 +160,15 @@ export default function App() {
         entry.secondary_subjects.some((s: Subject) => subjects.has(s))
       );
     });
-  }, [data, appState.state.currentYear, appState.state.enabledSubjects, allSubjectsDisabled]);
+  }, [data, appState.state.currentYear, appState.state.enabledSubjects, allSubjectsDisabled, effectiveWindowWidth]);
 
   const visibleHistoryCount = useMemo(() => {
     if (!data || !appState.state.showContextLayer) return 0;
-    const w = getWindowWidth(appState.state.currentYear, data.meta.eras);
     return data.entries.filter((e) => {
       if (e.subject !== 'world-history') return false;
-      return getEntryOpacity(e.year, appState.state.currentYear, w) > 0;
+      return getEntryOpacity(e.year, appState.state.currentYear, effectiveWindowWidth) > 0;
     }).length;
-  }, [data, appState.state.currentYear, appState.state.showContextLayer]);
+  }, [data, appState.state.currentYear, appState.state.showContextLayer, effectiveWindowWidth]);
 
   if (loading) {
     return <LoadingScreen />;
@@ -185,6 +192,7 @@ export default function App() {
     onEntryHover: handleEntryHover,
     zoom,
     pulseTime,
+    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
   });
 
   const entryCardLayers = createEntryCardLayers({
@@ -196,6 +204,8 @@ export default function App() {
     onEntryClick: handleEntryClick,
     onEntryHover: handleEntryHover,
     zoom,
+    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
+    preciseMode: scrubberZoomed,
   });
 
   const connectionLayers = createConnectionLayers({
@@ -205,6 +215,7 @@ export default function App() {
     eras: data.meta.eras,
     showKnowledgeFlow: appState.state.showKnowledgeFlow,
     onEntryClick: handleGhostNodeClick,
+    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
   });
 
   const historyLayers = createHistoryLayers({
@@ -216,6 +227,7 @@ export default function App() {
     onEntryClick: handleEntryClick,
     onEntryHover: handleEntryHover,
     zoom,
+    windowWidthOverride: scrubberZoomed ? effectiveWindowWidth : undefined,
   });
 
   const allLayers = [...connectionLayers, ...historyLayers, ...entryLayers, ...entryCardLayers];
@@ -254,6 +266,8 @@ export default function App() {
         onYearChange={appState.setYear}
         eras={data.meta.eras}
         entries={data.entries}
+        onEntrySelect={handleEntryClick}
+        onZoomChange={setScrubberZoomed}
       />
       <SidePanel
         entry={selectedEntry}

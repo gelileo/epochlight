@@ -14,6 +14,7 @@ export interface HistoryLayerProps {
   onEntryHover: (entry: Entry | null) => void;
   zoom?: number;
   pulseTime?: number;
+  windowWidthOverride?: number;
 }
 
 // Flame palette for glow/pulse effects and icon tinting
@@ -37,6 +38,7 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
     onEntryHover,
     zoom = 2,
     pulseTime = 0,
+    windowWidthOverride,
   } = props;
 
   if (!showContextLayer) return [];
@@ -44,7 +46,7 @@ export function createHistoryLayers(props: HistoryLayerProps): Layer[] {
   const zoomOpacity = getZoomOpacity(zoom);
   if (zoomOpacity <= 0) return [];
 
-  const windowWidth = getWindowWidth(currentYear, eras);
+  const windowWidth = windowWidthOverride ?? getWindowWidth(currentYear, eras);
 
   const historyEntries = entries.filter((entry) => {
     if (entry.subject !== 'world-history') return false;

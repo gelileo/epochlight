@@ -11,6 +11,7 @@ interface ConnectionLayerProps {
   eras: Era[];
   showKnowledgeFlow: boolean;
   onEntryClick: (entryId: string) => void;
+  windowWidthOverride?: number;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -37,9 +38,10 @@ export function createConnectionLayers(props: ConnectionLayerProps): Layer[] {
     eras,
     showKnowledgeFlow,
     onEntryClick,
+    windowWidthOverride,
   } = props;
 
-  const windowWidth = getWindowWidth(currentYear, eras);
+  const windowWidth = windowWidthOverride ?? getWindowWidth(currentYear, eras);
 
   // Build entry lookup map
   const entryMap = new Map<string, Entry>();
